@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.EmptyComposeActivity" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:background">@color/black</item>
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen_icon</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.EmptyComposeActivity</item>
+    </style>
+
+    <style name="AppBaseTheme" parent="android:Theme.Material">
+        <item name="android:datePickerDialogTheme">@style/MyDatePickerDialogTheme</item>
+    </style>
+
+    <style name="MyDatePickerDialogTheme" parent="android:Theme.Material.Dialog">
+        <item name="android:colorAccent">@color/dark_red</item>
+    </style>
+
+    <style name="MyDatePickerStyle" parent="@android:style/Widget.Material.DatePicker">
+        <item name="android:headerBackground">@color/black</item>
+        <item name="android:dayOfWeekBackground">@color/gray</item>
+        <item name="android:dayOfWeekTextAppearance">@color/black</item>
+        <item name="android:headerMonthTextAppearance">@color/black</item>
+        <item name="android:headerDayOfMonthTextAppearance">@color/black</item>
+        <item name="android:headerYearTextAppearance">@color/black</item>
+        <item name="android:yearListItemTextAppearance">@color/black</item>
+        <item name="android:yearListSelectorColor">@color/black</item>
+        <item name="android:calendarTextColor">@color/black</item>
+    </style>
+
+</resources>
