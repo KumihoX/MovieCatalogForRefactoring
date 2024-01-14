@@ -40,19 +40,11 @@ class SignInViewModel : ViewModel() {
     }
 
     fun onPasswordChange(newPassword: String) {
-        _uiState.value = _uiState.value.copy(password = newPassword)
-        if (_uiState.value.password == "") {
-            _uiState.value = _uiState.value.copy(emptyPassword = true)
-        } else {
-            if (_uiState.value.password.length < 8) {
-                _uiState.value = _uiState.value.copy(notValidPassword = true)
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    emptyPassword = false,
-                    notValidPassword = false
-                )
-            }
-        }
+        _uiState.value = _uiState.value.copy(
+            password = newPassword,
+            emptyPassword = newPassword == "",
+            notValidPassword = _uiState.value.password.length < 8
+        )
         checkFields()
     }
 
