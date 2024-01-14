@@ -30,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.emptycomposeactivity.R
 import com.example.emptycomposeactivity.navigation.Screens
+import com.example.emptycomposeactivity.screens.components.GenderButton
 import com.example.emptycomposeactivity.screens.signUpScreen.SignUpViewModel.SignUpScreenState
 import com.example.emptycomposeactivity.ui.theme.*
 import java.util.*
@@ -71,7 +72,10 @@ fun SignUpScreen(navController: NavController) {
         SignUpDateOfBirthField(state = state)
         { signUpViewModel.showDatePickerDialog(it) }
 
-        Gender(state = state)
+        GenderButton(
+            selectedMan = remember(state.manIsPressed) { state.manIsPressed },
+            selectedWoman = remember(state.womanIsPressed) { state.womanIsPressed }
+        )
         { signUpViewModel.buttonGenderIsPressed(it) }
 
         Column(
@@ -468,70 +472,6 @@ fun SignUpDateOfBirthField(state: SignUpScreenState, showDatePickerDialog: (Cont
 }
 
 @Composable
-fun Gender(state: SignUpScreenState, buttonGenderIsPressed: (Int) -> Unit) {
-
-    val selectedWoman = state.womanIsPressed
-    val selectedMan = state.manIsPressed
-
-    val womanBack =
-        if (selectedWoman) DarkRed else Black
-    val manBack = if (selectedMan) DarkRed else Black
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .padding(16.dp, 0.dp)
-            .border(1.dp, White, RoundedCornerShape(8.dp))
-    ) {
-        Button(
-            onClick = { buttonGenderIsPressed(1) },
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize(),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = manBack,
-                contentColor = White
-            ),
-            shape = RoundedCornerShape(8.dp, 0.dp, 0.dp, 8.dp),
-        )
-        {
-            Text(
-                stringResource(R.string.male),
-                style = MaterialTheme.typography.body2,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        Divider(
-            color = White,
-            modifier = Modifier
-                .width(1.dp)
-                .fillMaxHeight()
-        )
-
-        Button(
-            onClick = { buttonGenderIsPressed(2) },
-            shape = RoundedCornerShape(0.dp, 8.dp, 8.dp, 0.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = womanBack,
-                contentColor = White
-            ),
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
-        )
-        {
-            Text(
-                stringResource(R.string.female),
-                style = MaterialTheme.typography.body2,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
 fun SignUpRegister(
     state: SignUpScreenState,
     register: () -> Unit
@@ -592,5 +532,6 @@ fun SignUpIHaveAcc(navController: NavController) {
         )
     }
 }
+
 
 
