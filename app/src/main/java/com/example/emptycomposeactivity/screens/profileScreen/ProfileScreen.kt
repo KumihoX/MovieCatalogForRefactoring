@@ -13,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,42 +25,40 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.emptycomposeactivity.Navigation
 import com.example.emptycomposeactivity.R
-import com.example.emptycomposeactivity.navigation.Screens
+import com.example.emptycomposeactivity.screens.profileScreen.ProfileViewModel.ProfileScreenState
 import com.example.emptycomposeactivity.ui.theme.*
 
 @Composable
 fun ProfileScreen(logout: () -> Unit) {
     val viewModel = ProfileViewModel()
 
+    val state: ProfileScreenState by remember { viewModel.uiState }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
     ) {
-        Avatar(viewModel = viewModel)
+        Avatar(state = state)
 
-        ProfileEmailData(viewModel = viewModel)
+        ProfileEmailData(state = state, viewModel = viewModel)
         { viewModel.onEmailChange(it) }
 
-        ProfileLinkToAvatar(viewModel = viewModel) { viewModel.onUrlChange(it) }
-        ProfileName(viewModel = viewModel) { viewModel.onNameChange(it) }
+        ProfileLinkToAvatar(state = state) { viewModel.onUrlChange(it) }
+        ProfileName(state = state, viewModel = viewModel) { viewModel.onNameChange(it) }
 
-        ProfileDateOfBirth(viewModel = viewModel)
+        ProfileDateOfBirth(state = state)
         { viewModel.showDatePickerDialog(it) }
 
-        Gender(viewModel = viewModel) { viewModel.buttonGenderIsPressed(it) }
+        Gender(state = state) { viewModel.buttonGenderIsPressed(it) }
 
         Column(
             modifier = Modifier.fillMaxWidth()
         )
         {
-            ProfileSave(viewModel = viewModel) { viewModel.save() }
+            ProfileSave(state = state) { viewModel.save() }
             LogOut(viewModel = viewModel) { logout() }
         }
     }
@@ -69,10 +66,10 @@ fun ProfileScreen(logout: () -> Unit) {
 
 
 @Composable
-fun Avatar(viewModel: ProfileViewModel) {
+fun Avatar(state: ProfileScreenState) {
 
-    val image: String by remember { viewModel.url }
-    val nick: String by remember { viewModel.nick }
+    val image = state.url
+    val nick = state.nick
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -110,11 +107,11 @@ fun Avatar(viewModel: ProfileViewModel) {
 }
 
 @Composable
-fun ProfileEmailData(viewModel: ProfileViewModel, onEmailChange: (String) -> Unit) {
+fun ProfileEmailData(state: ProfileScreenState, viewModel: ProfileViewModel, onEmailChange: (String) -> Unit) {
 
-    val email: String by remember { viewModel.email }
-    val isValid: Boolean by remember { viewModel.correct }
-    val emptyEmail: Boolean by remember { viewModel.emptyEmail }
+    val email = state.email
+    val isValid = state.correct
+    val emptyEmail = state.emptyEmail
 
     Text(
         stringResource(R.string.email),
@@ -171,9 +168,9 @@ fun ProfileEmailData(viewModel: ProfileViewModel, onEmailChange: (String) -> Uni
 }
 
 @Composable
-fun ProfileLinkToAvatar(viewModel: ProfileViewModel, onUrlChange: (String) -> Unit) {
+fun ProfileLinkToAvatar(state: ProfileScreenState, onUrlChange: (String) -> Unit) {
 
-    val url: String by remember { viewModel.url }
+    val url = state.url
 
     Text(
         stringResource(R.string.avatar_link),
@@ -209,10 +206,10 @@ fun ProfileLinkToAvatar(viewModel: ProfileViewModel, onUrlChange: (String) -> Un
 }
 
 @Composable
-fun ProfileName(viewModel: ProfileViewModel, onNameChange: (String) -> Unit) {
+fun ProfileName(state: ProfileScreenState, viewModel: ProfileViewModel, onNameChange: (String) -> Unit) {
 
-    val name: String by remember { viewModel.name }
-    val emptyName: Boolean by remember { viewModel.emptyName }
+    val name = state.name
+    val emptyName = state.emptyName
 
     Text(
         stringResource(R.string.name),
@@ -270,10 +267,10 @@ fun ProfileName(viewModel: ProfileViewModel, onNameChange: (String) -> Unit) {
 
 @SuppressLint("ResourceType")
 @Composable
-fun ProfileDateOfBirth(viewModel: ProfileViewModel, showDatePickerDialog: (Context) -> Unit) {
+fun ProfileDateOfBirth(state: ProfileScreenState, showDatePickerDialog: (Context) -> Unit) {
     val context = LocalContext.current
 
-    val data: String by remember { viewModel.dateOfBirth }
+    val data = state.dateOfBirth
 
     Text(
         stringResource(R.string.birthdate),
@@ -328,10 +325,10 @@ fun ProfileDateOfBirth(viewModel: ProfileViewModel, showDatePickerDialog: (Conte
 }
 
 @Composable
-fun Gender(viewModel: ProfileViewModel, buttonGenderIsPressed: (Int) -> Unit) {
+fun Gender(state: ProfileScreenState, buttonGenderIsPressed: (Int) -> Unit) {
 
-    val selectedWoman: Boolean by remember { viewModel.womanIsPressed }
-    val selectedMan: Boolean by remember { viewModel.manIsPressed }
+    val selectedWoman = state.womanIsPressed
+    val selectedMan = state.manIsPressed
 
     val womanBack =
         if (selectedWoman) DarkRed else Black
@@ -401,10 +398,10 @@ fun Gender(viewModel: ProfileViewModel, buttonGenderIsPressed: (Int) -> Unit) {
 
 @Composable
 fun ProfileSave(
-    viewModel: ProfileViewModel,
+    state: ProfileScreenState,
     save: () -> Unit
 ) {
-    val fieldsFilled: Boolean by remember { viewModel.allFieldsFilled }
+    val fieldsFilled = state.allFieldsFilled
 
     val colorBorder =
         if (fieldsFilled) DarkRed

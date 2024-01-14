@@ -6,8 +6,6 @@ import android.content.Context
 import android.widget.DatePicker
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.emptycomposeactivity.R
@@ -15,7 +13,6 @@ import com.example.emptycomposeactivity.network.Network
 import com.example.emptycomposeactivity.network.auth.AuthRepository
 import com.example.emptycomposeactivity.network.user.UserData
 import com.example.emptycomposeactivity.network.user.UserRepository
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -25,38 +22,8 @@ class ProfileViewModel : ViewModel() {
     val emptyMessage = R.string.empty
     val invalidEmailMessage = R.string.wrong_email
 
-    private val _email = mutableStateOf("")
-    var email: State<String> = _email
-
-    private val _emptyEmail = mutableStateOf(false)
-    var emptyEmail: State<Boolean> = _emptyEmail
-
-    private val _name = mutableStateOf("")
-    var name: State<String> = _name
-
-    private val _emptyName = mutableStateOf(false)
-    var emptyName: State<Boolean> = _emptyName
-
-    private val _dateOfBirth = mutableStateOf("")
-    var dateOfBirth: State<String> = _dateOfBirth
-
-    private val _url = mutableStateOf("")
-    var url: State<String> = _url
-
-    private val _nick = mutableStateOf("")
-    var nick: State<String> = _nick
-
-    private val _manIsPressed = mutableStateOf(false)
-    var manIsPressed: State<Boolean> = _manIsPressed
-
-    private val _womanIsPressed = mutableStateOf(false)
-    var womanIsPressed: State<Boolean> = _womanIsPressed
-
-    private val _correct = mutableStateOf(true)
-    var correct: State<Boolean> = _correct
-
-    private val _allFieldsFilled = mutableStateOf(false)
-    var allFieldsFilled: State<Boolean> = _allFieldsFilled
+    private val _uiState = mutableStateOf(ProfileScreenState())
+    var uiState: State<ProfileScreenState> = _uiState
 
     private var _gender = 0
 
@@ -70,11 +37,13 @@ class ProfileViewModel : ViewModel() {
 
     init {
         if (userData != null) {
-            _nick.value = userData!!.nickName
-            _email.value = userData!!.email
-            _name.value = userData!!.name
             birthdayForOutput()
-            _url.value = userData!!.avatarLink
+            _uiState.value = _uiState.value.copy(
+                nick = userData!!.nickName,
+                email = userData!!.email,
+                name = userData!!.name,
+                url = userData!!.avatarLink,
+            )
             _gender = userData!!.gender
             checkGender()
         }
@@ -82,26 +51,29 @@ class ProfileViewModel : ViewModel() {
 
     private fun birthdayForOutput() {
         val dataInBirthday = userData!!.birthDate.substringBefore("T").split('-')
-        _dateOfBirth.value = dataInBirthday[2] + "." + dataInBirthday[1] + "." + dataInBirthday[0]
-        startBirthday = _dateOfBirth.value
+        _uiState.value =
+            _uiState.value.copy(dateOfBirth = dataInBirthday[2] + "." + dataInBirthday[1] + "." + dataInBirthday[0])
+
+        startBirthday = _uiState.value.dateOfBirth
     }
 
 
     private fun correctEmail() {
-        _correct.value =
-            _email.value?.let { android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches() } == true
+        _uiState.value = _uiState.value.copy(correct = _uiState.value.email.let {
+            android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
+        })
     }
 
     private fun checkGender() {
         if (_gender == 1) {
-            _womanIsPressed.value = true
+            _uiState.value = _uiState.value.copy(womanIsPressed = true)
         } else
-            _manIsPressed.value = true
+            _uiState.value = _uiState.value.copy(manIsPressed = true)
     }
 
     private fun checkData() {
         val start = startBirthday.split('.')
-        val current = _dateOfBirth.value.split(".")
+        val current = _uiState.value.dateOfBirth.split(".")
 
         dataChange = !(start[0].toInt() == current[0].toInt() &&
                 start[1].toInt() == current[1].toInt() &&
@@ -111,28 +83,32 @@ class ProfileViewModel : ViewModel() {
 
     private fun changes() {
         checkData()
-        hasChanges = _email.value != userData!!.email || _url.value != userData!!.avatarLink ||
-                _name.value != userData!!.name || dataChange ||
-                _gender != userData!!.gender
+        with(_uiState.value) {
+            hasChanges = email != userData!!.email || url != userData!!.avatarLink ||
+                    name != userData!!.name || dataChange ||
+                    _gender != userData!!.gender
+        }
+
     }
 
     private fun checkFields() {
 
         changes()
 
-        val email = _email.value
-        val name = _name.value
-        val dateOfBirth = _dateOfBirth.value
+        val email = _uiState.value.email
+        val name = _uiState.value.name
+        val dateOfBirth = _uiState.value.dateOfBirth
 
         if (email.isNotEmpty() && name.isNotEmpty() && dateOfBirth.isNotEmpty()
         ) {
-            _allFieldsFilled.value = _correct.value == hasChanges
+            _uiState.value =
+                _uiState.value.copy(allFieldsFilled = _uiState.value.correct == hasChanges)
         } else
-            _allFieldsFilled.value = false
+            _uiState.value = _uiState.value.copy(allFieldsFilled = false)
     }
 
     private fun correctBirth() {
-        val list = _dateOfBirth.value.split(".").toMutableList()
+        val list = _uiState.value.dateOfBirth.split(".").toMutableList()
         if (list[0].toInt() < 10) {
             list[0] = "0" + list[0].toInt().toString()
         }
@@ -143,20 +119,26 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun onEmailChange(newEmail: String) {
-        _email.value = newEmail
-        _emptyEmail.value = _email.value == ""
+        _uiState.value = _uiState.value.copy(
+            email = newEmail,
+            emptyEmail = _uiState.value.email == ""
+        )
         correctEmail()
         checkFields()
     }
 
     fun onUrlChange(newUrl: String) {
-        _url.value = newUrl
+        _uiState.value = _uiState.value.copy(
+            url = newUrl
+        )
         checkFields()
     }
 
     fun onNameChange(newName: String) {
-        _name.value = newName
-        _emptyName.value = _name.value == ""
+        _uiState.value = _uiState.value.copy(
+            name = newName,
+            emptyName = _uiState.value.name == ""
+        )
         checkFields()
     }
 
@@ -178,7 +160,8 @@ class ProfileViewModel : ViewModel() {
             context,
             R.style.MyDatePickerDialogTheme,
             { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-                _dateOfBirth.value = "$mDayOfMonth.${mMonth + 1}.$mYear"
+                _uiState.value =
+                    _uiState.value.copy(dateOfBirth = "$mDayOfMonth.${mMonth + 1}.$mYear")
                 checkFields()
             },
             year,
@@ -192,15 +175,19 @@ class ProfileViewModel : ViewModel() {
     fun buttonGenderIsPressed(who: Int) {
         when (who) {
             1 -> {
-                _manIsPressed.value = true
-                _womanIsPressed.value = false
+                _uiState.value = _uiState.value.copy(
+                    manIsPressed = true,
+                    womanIsPressed = false
+                )
                 _gender = 0
                 checkFields()
             }
 
             2 -> {
-                _manIsPressed.value = false
-                _womanIsPressed.value = true
+                _uiState.value = _uiState.value.copy(
+                    manIsPressed = false,
+                    womanIsPressed = true
+                )
                 _gender = 1
                 checkFields()
             }
@@ -216,9 +203,9 @@ class ProfileViewModel : ViewModel() {
                 UserData(
                     id = userData!!.id,
                     nickName = userData!!.nickName,
-                    email = _email.value,
-                    avatarLink = _url.value,
-                    name = _name.value,
+                    email = _uiState.value.email,
+                    avatarLink = _uiState.value.url,
+                    name = _uiState.value.name,
                     birthDate = correctBirthday,
                     gender = _gender
                 )
@@ -226,16 +213,20 @@ class ProfileViewModel : ViewModel() {
             repositoryUser.getUserData().collect {
                 userData = it
                 if (userData != null) {
-                    _nick.value = userData!!.nickName
-                    _email.value = userData!!.email
-                    _name.value = userData!!.name
                     birthdayForOutput()
-                    _url.value = userData!!.avatarLink
+                    _uiState.value = _uiState.value.copy(
+                        nick = userData!!.nickName,
+                        email = userData!!.email,
+                        name = userData!!.name,
+                        url = userData!!.avatarLink
+                    )
                     _gender = userData!!.gender
                     checkGender()
                 }
             }
-            _allFieldsFilled.value = false
+            _uiState.value = _uiState.value.copy(
+                allFieldsFilled = false
+            )
             hasChanges = false
         }
     }
@@ -252,6 +243,19 @@ class ProfileViewModel : ViewModel() {
             Network.movieDetail = null
             Network.userData = null
         }
-
     }
+
+    data class ProfileScreenState(
+        val email: String = "",
+        val emptyEmail: Boolean = false,
+        val name: String = "",
+        val emptyName: Boolean = false,
+        val dateOfBirth: String = "",
+        val url: String = "",
+        val nick: String = "",
+        val manIsPressed: Boolean = false,
+        val womanIsPressed: Boolean = false,
+        val correct: Boolean = true,
+        val allFieldsFilled: Boolean = false,
+    )
 }
