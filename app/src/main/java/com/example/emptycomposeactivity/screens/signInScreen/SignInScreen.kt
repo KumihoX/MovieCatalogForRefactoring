@@ -2,13 +2,26 @@ package com.example.emptycomposeactivity.screens.signInScreen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -16,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,12 +36,20 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.emptycomposeactivity.R
 import com.example.emptycomposeactivity.navigation.Screens
-import com.example.emptycomposeactivity.ui.theme.*
+import com.example.emptycomposeactivity.screens.signInScreen.SignInViewModel.SignInScreenState
+import com.example.emptycomposeactivity.ui.theme.Black
+import com.example.emptycomposeactivity.ui.theme.DarkRed
+import com.example.emptycomposeactivity.ui.theme.Gray
+import com.example.emptycomposeactivity.ui.theme.GrayFaded
+import com.example.emptycomposeactivity.ui.theme.IBM
+import com.example.emptycomposeactivity.ui.theme.White
 
 @Composable
 fun SignInScreen(navController: NavHostController) {
 
     val signInViewModel: SignInViewModel = viewModel()
+
+    val state: SignInScreenState by remember { signInViewModel.uiState }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -37,8 +57,11 @@ fun SignInScreen(navController: NavHostController) {
     )
     {
         SignInLogo()
-        LoginField(viewModel = signInViewModel) { signInViewModel.onLoginChange(it) }
-        PasswordField(viewModel = signInViewModel) { signInViewModel.onPasswordChange(it) }
+        LoginField(state = state, viewModel = signInViewModel) { signInViewModel.onLoginChange(it) }
+        PasswordField(
+            state = state,
+            viewModel = signInViewModel
+        ) { signInViewModel.onPasswordChange(it) }
     }
 
     Column(
@@ -46,7 +69,7 @@ fun SignInScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.Bottom
     )
     {
-        SignInComeIn(viewModel = signInViewModel, navController = navController)
+        SignInComeIn(state = state, viewModel = signInViewModel, navController = navController)
         SignInRegister(navController = navController)
     }
 }
@@ -61,10 +84,14 @@ fun SignInLogo() {
 }
 
 @Composable
-fun LoginField(viewModel: SignInViewModel, onLoginChange: (String) -> Unit) {
+fun LoginField(
+    state: SignInScreenState,
+    viewModel: SignInViewModel,
+    onLoginChange: (String) -> Unit
+) {
 
-    val login: String by remember { viewModel.login }
-    val emptyLogin: Boolean by remember { viewModel.emptyLogin }
+    val login = state.login
+    val emptyLogin = state.emptyLogin
 
     Column(
         modifier = Modifier
@@ -112,11 +139,15 @@ fun LoginField(viewModel: SignInViewModel, onLoginChange: (String) -> Unit) {
 }
 
 @Composable
-fun PasswordField(viewModel: SignInViewModel, onPasswordChange: (String) -> Unit) {
+fun PasswordField(
+    state: SignInScreenState,
+    viewModel: SignInViewModel,
+    onPasswordChange: (String) -> Unit
+) {
 
-    val password: String by remember { viewModel.password }
-    val emptyPassword: Boolean by remember { viewModel.emptyPassword }
-    val notValidPassword: Boolean by remember { viewModel.notValidPassword }
+    val password = state.password
+    val emptyPassword = state.emptyPassword
+    val notValidPassword = state.notValidPassword
 
     Column(
         modifier = Modifier
@@ -172,10 +203,11 @@ fun PasswordField(viewModel: SignInViewModel, onPasswordChange: (String) -> Unit
 
 @Composable
 fun SignInComeIn(
+    state: SignInScreenState,
     viewModel: SignInViewModel,
     navController: NavController
 ) {
-    val fieldsFilled: Boolean by remember { viewModel.allFieldsFilled }
+    val fieldsFilled = state.allFieldsFilled
 
     val colorBorder =
         if (fieldsFilled) DarkRed

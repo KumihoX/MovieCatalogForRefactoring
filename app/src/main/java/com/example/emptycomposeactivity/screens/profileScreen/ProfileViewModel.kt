@@ -121,7 +121,7 @@ class ProfileViewModel : ViewModel() {
     fun onEmailChange(newEmail: String) {
         _uiState.value = _uiState.value.copy(
             email = newEmail,
-            emptyEmail = _uiState.value.email == ""
+            emptyEmail = newEmail == ""
         )
         correctEmail()
         checkFields()
@@ -137,7 +137,7 @@ class ProfileViewModel : ViewModel() {
     fun onNameChange(newName: String) {
         _uiState.value = _uiState.value.copy(
             name = newName,
-            emptyName = _uiState.value.name == ""
+            emptyName = newName == ""
         )
         checkFields()
     }

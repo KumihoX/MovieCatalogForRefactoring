@@ -19,51 +19,38 @@ class SignInViewModel : ViewModel() {
     val emptyMessage = R.string.empty
     val incorrectPasswordMessage = R.string.wrong_password
 
-
-    private val _login = mutableStateOf("")
-    var login: State<String> = _login
-
-    private val _emptyLogin = mutableStateOf(false)
-    var emptyLogin: State<Boolean> = _emptyLogin
-
-
-    private val _password = mutableStateOf("")
-    var password: State<String> = _password
-
-    private val _notValidPassword = mutableStateOf(false)
-    var notValidPassword: State<Boolean> = _notValidPassword
-
-    private val _emptyPassword = mutableStateOf(false)
-    var emptyPassword: State<Boolean> = _emptyPassword
-
-
-    private val _allFieldsFilled = mutableStateOf(false)
-    var allFieldsFilled: State<Boolean> = _allFieldsFilled
+    private val _uiState = mutableStateOf(SignInScreenState())
+    var uiState: State<SignInScreenState> = _uiState
 
     private fun checkFields() {
-        val login = _login.value
-        val password = _password.value
+        val login = _uiState.value.login
+        val password = _uiState.value.password
         if (login != "" && password != "") {
-            _allFieldsFilled.value = login.isNotEmpty() && password.isNotEmpty()
+            _uiState.value =
+                _uiState.value.copy(allFieldsFilled = login.isNotEmpty() && password.isNotEmpty())
         }
     }
 
     fun onLoginChange(newLogin: String) {
-        _login.value = newLogin
-        _emptyLogin.value = _login.value == ""
+        _uiState.value = _uiState.value.copy(
+            login = newLogin,
+            emptyLogin = newLogin == ""
+        )
         checkFields()
     }
 
     fun onPasswordChange(newPassword: String) {
-        _password.value = newPassword
-        if (_password.value == "") {
-            _emptyPassword.value = true
+        _uiState.value = _uiState.value.copy(password = newPassword)
+        if (_uiState.value.password == "") {
+            _uiState.value = _uiState.value.copy(emptyPassword = true)
         } else {
-            if (_password.value.length < 8) {
-                _notValidPassword.value = true
+            if (_uiState.value.password.length < 8) {
+                _uiState.value = _uiState.value.copy(notValidPassword = true)
             } else {
-                _emptyPassword.value = false
-                _notValidPassword.value = false
+                _uiState.value = _uiState.value.copy(
+                    emptyPassword = false,
+                    notValidPassword = false
+                )
             }
         }
         checkFields()
@@ -77,8 +64,8 @@ class SignInViewModel : ViewModel() {
         viewModelScope.launch {
             repositoryAuth.login(
                 LoginRequestBody(
-                    username = _login.value,
-                    password = _password.value
+                    username = _uiState.value.login,
+                    password = _uiState.value.password
                 )
             ).collect {}
             repositoryFavoriteMovies.getFavoriteMovies().collect {}
@@ -92,4 +79,13 @@ class SignInViewModel : ViewModel() {
             }
         }
     }
+
+    data class SignInScreenState(
+        val login: String = "",
+        val emptyLogin: Boolean = false,
+        val password: String = "",
+        val notValidPassword: Boolean = false,
+        val emptyPassword: Boolean = false,
+        val allFieldsFilled: Boolean = false,
+    )
 }
