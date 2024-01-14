@@ -8,16 +8,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.emptycomposeactivity.R
+import com.example.emptycomposeactivity.navigation.Screens
 import com.example.emptycomposeactivity.network.auth.AuthRepository
 import com.example.emptycomposeactivity.network.auth.LoginRequestBody
 import com.example.emptycomposeactivity.network.auth.RegisterRequestBody
 import com.example.emptycomposeactivity.network.favoriteMovies.FavoriteMoviesRepository
-import com.example.emptycomposeactivity.R
-import com.example.emptycomposeactivity.navigation.Screens
 import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.network.user.UserRepository
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 class SignUpViewModel : ViewModel() {
 
@@ -26,83 +27,34 @@ class SignUpViewModel : ViewModel() {
     val invalidEmailMessage = R.string.wrong_email
     val notEqualMessage = R.string.not_equal
 
-    private val _login = mutableStateOf("")
-    var login: State<String> = _login
-
-    private val _emptyLogin = mutableStateOf(false)
-    var emptyLogin: State<Boolean> = _emptyLogin
-
-    private val _email = mutableStateOf("")
-    var email: State<String> = _email
-
-    private val _emptyEmail = mutableStateOf(false)
-    var emptyEmail: State<Boolean> = _emptyEmail
-
-    private val _name = mutableStateOf("")
-    var name: State<String> = _name
-
-    private val _emptyName = mutableStateOf(false)
-    var emptyName: State<Boolean> = _emptyName
-
-    private val _password = mutableStateOf("")
-    var password: State<String> = _password
-
-    private val _notValidPassword = mutableStateOf(false)
-    var notValidPassword: State<Boolean> = _notValidPassword
-
-    private val _emptyPassword = mutableStateOf(false)
-    var emptyPassword: State<Boolean> = _emptyPassword
-
-    private val _confirmPassword = mutableStateOf("")
-    var confirmPassword: State<String> = _confirmPassword
-
-    private val _emptyConfirmPassword = mutableStateOf(false)
-    var emptyConfirmPassword: State<Boolean> = _emptyConfirmPassword
-
-    private val _dateOfBirth = mutableStateOf("")
-    var dateOfBirth: State<String> = _dateOfBirth
-
-    private val _manIsPressed = mutableStateOf(false)
-    var manIsPressed: State<Boolean> = _manIsPressed
-
-    private val _womanIsPressed = mutableStateOf(false)
-    var womanIsPressed: State<Boolean> = _womanIsPressed
+    private val _uiState = mutableStateOf(SignUpScreenState())
+    var uiState: State<SignUpScreenState> = _uiState
 
     private var _gender: Int = -1
-
-    private val _equality = mutableStateOf(true)
-    var equality: State<Boolean> = _equality
-
-    private val _correct = mutableStateOf(true)
-    var correct: State<Boolean> = _correct
-
-    private val _allFieldsFilled = mutableStateOf(false)
-    var allFieldsFilled: State<Boolean> = _allFieldsFilled
-
-
     private var correctBirthday: String = ""
 
     private fun passwordComparison() {
-        _equality.value = _password.value == _confirmPassword.value
+        _uiState.value = _uiState.value.copy(
+            equality = _uiState.value.password == _uiState.value.confirmPassword
+        )
     }
 
     private fun correctEmail() {
-        _correct.value =
-            _email.value.let { android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches() } == true
+        _uiState.value = _uiState.value.copy(correct = _uiState.value.email.let {
+            android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
+        })
     }
 
     private fun checkGender() {
-        _gender = if (_manIsPressed.value || _womanIsPressed.value) {
-            if (_womanIsPressed.value) {
+        _gender = if (_uiState.value.manIsPressed || _uiState.value.womanIsPressed) {
+            if (_uiState.value.womanIsPressed) {
                 1
-            } else
-                0
-        } else
-            -1
+            } else 0
+        } else -1
     }
 
     private fun correctBirth() {
-        val list = _dateOfBirth.value.split(".").toMutableList()
+        val list = _uiState.value.dateOfBirth.split(".").toMutableList()
         if (list[0].toInt() < 10) {
             list[0] = "0" + list[0]
         }
@@ -113,56 +65,66 @@ class SignUpViewModel : ViewModel() {
     }
 
     private fun checkFields() {
-        val login = _login.value
-        val email = _email.value
-        val name = _name.value
-        val password = _password.value
-        val confirmPassword = _confirmPassword.value
-        val dateOfBirth = _dateOfBirth.value
-        val notValidPassword = _notValidPassword.value
+        val login = _uiState.value.login
+        val email = _uiState.value.email
+        val name = _uiState.value.name
+        val password = _uiState.value.password
+        val confirmPassword = _uiState.value.confirmPassword
+        val dateOfBirth = _uiState.value.dateOfBirth
+        val notValidPassword = _uiState.value.notValidPassword
         checkGender()
 
-        if (login.isNotEmpty() && email.isNotEmpty()
-            && name.isNotEmpty() && password.isNotEmpty()
-            && confirmPassword.isNotEmpty() && dateOfBirth.isNotEmpty()
-            && !notValidPassword
-        ) {
+        if (login.isNotEmpty() && email.isNotEmpty() && name.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && dateOfBirth.isNotEmpty() && !notValidPassword) {
             if (_gender != -1) {
-                _allFieldsFilled.value = _equality.value == _correct.value == true
+                _uiState.value = _uiState.value.copy(
+                    allFieldsFilled = _uiState.value.equality == _uiState.value.correct
+                )
+
             }
-        } else
-            _allFieldsFilled.value = false
+        } else _uiState.value = _uiState.value.copy(
+            allFieldsFilled = false
+        )
     }
 
     fun onLoginChange(newLogin: String) {
-        _login.value = newLogin
-        _emptyLogin.value = _login.value == ""
+        _uiState.value = _uiState.value.copy(
+            login = newLogin, emptyLogin = newLogin == ""
+        )
         checkFields()
     }
 
     fun onEmailChange(newEmail: String) {
-        _email.value = newEmail
-        _emptyEmail.value = _email.value == ""
+        _uiState.value = _uiState.value.copy(
+            email = newEmail, emptyEmail = newEmail == ""
+        )
         correctEmail()
         checkFields()
     }
 
     fun onNameChange(newName: String) {
-        _name.value = newName
-        _emptyName.value = _name.value == ""
+        _uiState.value = _uiState.value.copy(
+            name = newName, emptyName = newName == ""
+        )
         checkFields()
     }
 
     fun onPasswordChange(newPassword: String) {
-        _password.value = newPassword
-        if (_password.value == "") {
-            _emptyPassword.value = true
+        _uiState.value = _uiState.value.copy(
+            password = newPassword
+        )
+        if (_uiState.value.password == "") {
+            _uiState.value = _uiState.value.copy(
+                emptyPassword = true
+            )
         } else {
-            if (_password.value.length < 8) {
-                _notValidPassword.value = true
+            if (_uiState.value.password.length < 8) {
+                _uiState.value = _uiState.value.copy(
+                    notValidPassword = true
+                )
             } else {
-                _emptyPassword.value = false
-                _notValidPassword.value = false
+                _uiState.value = _uiState.value.copy(
+                    emptyPassword = false, notValidPassword = false
+                )
             }
         }
         passwordComparison()
@@ -170,8 +132,9 @@ class SignUpViewModel : ViewModel() {
     }
 
     fun onConfirmPasswordChange(newConfirmPassword: String) {
-        _confirmPassword.value = newConfirmPassword
-        _emptyConfirmPassword.value = _confirmPassword.value == ""
+        _uiState.value = _uiState.value.copy(
+            confirmPassword = newConfirmPassword, emptyConfirmPassword = newConfirmPassword == ""
+        )
         passwordComparison()
         checkFields()
     }
@@ -193,7 +156,9 @@ class SignUpViewModel : ViewModel() {
             context,
             R.style.MyDatePickerDialogTheme,
             { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-                _dateOfBirth.value = "$mDayOfMonth.${mMonth + 1}.$mYear"
+                _uiState.value = _uiState.value.copy(
+                    dateOfBirth = "$mDayOfMonth.${mMonth + 1}.$mYear"
+                )
                 checkFields()
             },
             year,
@@ -207,18 +172,20 @@ class SignUpViewModel : ViewModel() {
     fun buttonGenderIsPressed(who: Int) {
         when (who) {
             1 -> {
-                _manIsPressed.value = !_manIsPressed.value
-                if (_womanIsPressed.value) {
-                    _womanIsPressed.value = !_womanIsPressed.value
+                _uiState.value = _uiState.value.copy(manIsPressed = !_uiState.value.manIsPressed)
+                if (_uiState.value.womanIsPressed) {
+                    _uiState.value =
+                        _uiState.value.copy(womanIsPressed = !_uiState.value.womanIsPressed)
                 }
-
                 checkFields()
             }
 
             2 -> {
-                _womanIsPressed.value = !_womanIsPressed.value
-                if (_manIsPressed.value) {
-                    _manIsPressed.value = !_manIsPressed.value
+                _uiState.value =
+                    _uiState.value.copy(womanIsPressed = !_uiState.value.womanIsPressed)
+                if (_uiState.value.manIsPressed) {
+                    _uiState.value =
+                        _uiState.value.copy(manIsPressed = !_uiState.value.manIsPressed)
                 }
 
                 checkFields()
@@ -235,10 +202,10 @@ class SignUpViewModel : ViewModel() {
         viewModelScope.launch {
             repositoryAuth.register(
                 RegisterRequestBody(
-                    userName = _login.value,
-                    name = _name.value,
-                    password = _password.value,
-                    email = _email.value,
+                    userName = _uiState.value.login,
+                    name = _uiState.value.name,
+                    password = _uiState.value.password,
+                    email = _uiState.value.email,
                     birthDate = correctBirthday,
                     gender = _gender
                 )
@@ -246,8 +213,7 @@ class SignUpViewModel : ViewModel() {
 
             repositoryAuth.login(
                 LoginRequestBody(
-                    username = _login.value,
-                    password = _password.value
+                    username = _uiState.value.login, password = _uiState.value.password
                 )
             ).collect {}
 
@@ -265,4 +231,24 @@ class SignUpViewModel : ViewModel() {
             }
         }
     }
+
+    data class SignUpScreenState(
+        val login: String = "",
+        val emptyLogin: Boolean = false,
+        val email: String = "",
+        val emptyEmail: Boolean = false,
+        val name: String = "",
+        val emptyName: Boolean = false,
+        val password: String = "",
+        val notValidPassword: Boolean = false,
+        val emptyPassword: Boolean = false,
+        val confirmPassword: String = "",
+        val emptyConfirmPassword: Boolean = false,
+        val dateOfBirth: String = "",
+        val manIsPressed: Boolean = false,
+        val womanIsPressed: Boolean = false,
+        val equality: Boolean = true,
+        val correct: Boolean = true,
+        val allFieldsFilled: Boolean = false,
+    )
 }

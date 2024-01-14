@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -31,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.emptycomposeactivity.R
 import com.example.emptycomposeactivity.navigation.Screens
+import com.example.emptycomposeactivity.screens.signUpScreen.SignUpViewModel.SignUpScreenState
 import com.example.emptycomposeactivity.ui.theme.*
 import java.util.*
 
@@ -39,6 +39,7 @@ import java.util.*
 fun SignUpScreen(navController: NavController) {
 
     val signUpViewModel: SignUpViewModel = viewModel()
+    val state: SignUpScreenState by remember { signUpViewModel.uiState }
 
     Column(
         modifier = Modifier
@@ -47,24 +48,37 @@ fun SignUpScreen(navController: NavController) {
     ) {
         SignUpLogo()
         SignUpRegistrationText()
-        SignUpLoginField(viewModel = signUpViewModel) { signUpViewModel.onLoginChange(it) }
-        SignUpEMailField(viewModel = signUpViewModel) { signUpViewModel.onEmailChange(it) }
-        SignUpNameField(viewModel = signUpViewModel) { signUpViewModel.onNameChange(it) }
-        SignUpPasswordField(viewModel = signUpViewModel) { signUpViewModel.onPasswordChange(it) }
-        SignUpConfirmPasswordField(viewModel = signUpViewModel)
+        SignUpLoginField(
+            state = state,
+            viewModel = signUpViewModel
+        ) { signUpViewModel.onLoginChange(it) }
+        SignUpEMailField(
+            state = state,
+            viewModel = signUpViewModel
+        ) { signUpViewModel.onEmailChange(it) }
+        SignUpNameField(state = state, viewModel = signUpViewModel) {
+            signUpViewModel.onNameChange(
+                it
+            )
+        }
+        SignUpPasswordField(
+            state = state,
+            viewModel = signUpViewModel
+        ) { signUpViewModel.onPasswordChange(it) }
+        SignUpConfirmPasswordField(state = state, viewModel = signUpViewModel)
         { signUpViewModel.onConfirmPasswordChange(it) }
 
-        SignUpDateOfBirthField(viewModel = signUpViewModel)
+        SignUpDateOfBirthField(state = state)
         { signUpViewModel.showDatePickerDialog(it) }
 
-        Gender(viewModel = signUpViewModel)
+        Gender(state = state)
         { signUpViewModel.buttonGenderIsPressed(it) }
 
         Column(
             modifier = Modifier.fillMaxWidth(),
         )
         {
-            SignUpRegister(viewModel = signUpViewModel)
+            SignUpRegister(state = state)
             { signUpViewModel.register(navController = navController) }
 
             SignUpIHaveAcc(navController)
@@ -119,10 +133,14 @@ fun SignUpRegistrationText() {
 }
 
 @Composable
-fun SignUpLoginField(viewModel: SignUpViewModel, onLoginChange: (String) -> Unit) {
+fun SignUpLoginField(
+    state: SignUpScreenState,
+    viewModel: SignUpViewModel,
+    onLoginChange: (String) -> Unit
+) {
 
-    val login: String by remember { viewModel.login }
-    val emptyLogin: Boolean by remember { viewModel.emptyLogin }
+    val login = state.login
+    val emptyLogin = state.emptyLogin
 
     Column(
         modifier = Modifier
@@ -169,11 +187,15 @@ fun SignUpLoginField(viewModel: SignUpViewModel, onLoginChange: (String) -> Unit
 }
 
 @Composable
-fun SignUpEMailField(viewModel: SignUpViewModel, onEmailChange: (String) -> Unit) {
+fun SignUpEMailField(
+    state: SignUpScreenState,
+    viewModel: SignUpViewModel,
+    onEmailChange: (String) -> Unit
+) {
 
-    val email: String by remember { viewModel.email }
-    val emptyEmail: Boolean by remember { viewModel.emptyEmail }
-    val isValid: Boolean by remember { viewModel.correct }
+    val email = state.email
+    val emptyEmail = state.emptyEmail
+    val isValid = state.correct
 
     Column(
         modifier = Modifier
@@ -221,10 +243,14 @@ fun SignUpEMailField(viewModel: SignUpViewModel, onEmailChange: (String) -> Unit
 }
 
 @Composable
-fun SignUpNameField(viewModel: SignUpViewModel, onNameChange: (String) -> Unit) {
+fun SignUpNameField(
+    state: SignUpScreenState,
+    viewModel: SignUpViewModel,
+    onNameChange: (String) -> Unit
+) {
 
-    val name: String by remember { viewModel.name }
-    val emptyName: Boolean by remember { viewModel.emptyName }
+    val name = state.name
+    val emptyName = state.emptyName
 
     Column(
         modifier = Modifier.padding(16.dp, 8.dp)
@@ -270,11 +296,15 @@ fun SignUpNameField(viewModel: SignUpViewModel, onNameChange: (String) -> Unit) 
 }
 
 @Composable
-fun SignUpPasswordField(viewModel: SignUpViewModel, onPasswordChange: (String) -> Unit) {
+fun SignUpPasswordField(
+    state: SignUpScreenState,
+    viewModel: SignUpViewModel,
+    onPasswordChange: (String) -> Unit
+) {
 
-    val password: String by remember { viewModel.password }
-    val emptyPassword: Boolean by remember { viewModel.emptyPassword }
-    val notValidPassword: Boolean by remember { viewModel.notValidPassword }
+    val password = state.password
+    val emptyPassword = state.emptyPassword
+    val notValidPassword = state.notValidPassword
 
     Column(
         modifier = Modifier
@@ -329,13 +359,14 @@ fun SignUpPasswordField(viewModel: SignUpViewModel, onPasswordChange: (String) -
 
 @Composable
 fun SignUpConfirmPasswordField(
+    state: SignUpScreenState,
     viewModel: SignUpViewModel,
     onConfirmPasswordChange: (String) -> Unit
 ) {
 
-    val confirmPassword: String by remember { viewModel.confirmPassword }
-    val emptyConfirmPassword: Boolean by remember { viewModel.emptyConfirmPassword }
-    val equal: Boolean by remember { viewModel.equality }
+    val confirmPassword = state.confirmPassword
+    val emptyConfirmPassword = state.emptyConfirmPassword
+    val equal = state.equality
 
     Column(
         modifier = Modifier
@@ -389,10 +420,10 @@ fun SignUpConfirmPasswordField(
 
 @SuppressLint("ResourceType")
 @Composable
-fun SignUpDateOfBirthField(viewModel: SignUpViewModel, showDatePickerDialog: (Context) -> Unit) {
+fun SignUpDateOfBirthField(state: SignUpScreenState, showDatePickerDialog: (Context) -> Unit) {
     val context = LocalContext.current
 
-    val dateOfBirth: String by remember { viewModel.dateOfBirth }
+    val dateOfBirth = state.dateOfBirth
 
     OutlinedTextField(
         value = dateOfBirth,
@@ -437,10 +468,10 @@ fun SignUpDateOfBirthField(viewModel: SignUpViewModel, showDatePickerDialog: (Co
 }
 
 @Composable
-fun Gender(viewModel: SignUpViewModel, buttonGenderIsPressed: (Int) -> Unit) {
+fun Gender(state: SignUpScreenState, buttonGenderIsPressed: (Int) -> Unit) {
 
-    val selectedWoman: Boolean by remember { viewModel.womanIsPressed }
-    val selectedMan: Boolean by remember { viewModel.manIsPressed }
+    val selectedWoman = state.womanIsPressed
+    val selectedMan = state.manIsPressed
 
     val womanBack =
         if (selectedWoman) DarkRed else Black
@@ -502,11 +533,10 @@ fun Gender(viewModel: SignUpViewModel, buttonGenderIsPressed: (Int) -> Unit) {
 
 @Composable
 fun SignUpRegister(
-    viewModel: SignUpViewModel,
+    state: SignUpScreenState,
     register: () -> Unit
 ) {
-
-    val fieldsFilled: Boolean by remember { viewModel.allFieldsFilled }
+    val fieldsFilled = state.allFieldsFilled
 
     val colorBorder =
         if (fieldsFilled) DarkRed
