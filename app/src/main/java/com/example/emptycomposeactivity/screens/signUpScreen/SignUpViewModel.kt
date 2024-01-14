@@ -172,25 +172,20 @@ class SignUpViewModel : ViewModel() {
     fun buttonGenderIsPressed(who: Int) {
         when (who) {
             1 -> {
-                _uiState.value = _uiState.value.copy(manIsPressed = !_uiState.value.manIsPressed)
-                if (_uiState.value.womanIsPressed) {
-                    _uiState.value =
-                        _uiState.value.copy(womanIsPressed = !_uiState.value.womanIsPressed)
-                }
-                checkFields()
+                _uiState.value = _uiState.value.copy(
+                    manIsPressed = true,
+                    womanIsPressed = false
+                )
             }
 
             2 -> {
-                _uiState.value =
-                    _uiState.value.copy(womanIsPressed = !_uiState.value.womanIsPressed)
-                if (_uiState.value.manIsPressed) {
-                    _uiState.value =
-                        _uiState.value.copy(manIsPressed = !_uiState.value.manIsPressed)
-                }
-
-                checkFields()
+                _uiState.value = _uiState.value.copy(
+                    manIsPressed = false,
+                    womanIsPressed = true
+                )
             }
         }
+        checkFields()
     }
 
     fun register(navController: NavController) {
