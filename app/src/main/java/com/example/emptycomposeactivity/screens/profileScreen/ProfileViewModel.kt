@@ -180,7 +180,6 @@ class ProfileViewModel : ViewModel() {
                     womanIsPressed = false
                 )
                 _gender = 0
-                checkFields()
             }
 
             2 -> {
@@ -189,9 +188,9 @@ class ProfileViewModel : ViewModel() {
                     womanIsPressed = true
                 )
                 _gender = 1
-                checkFields()
             }
         }
+        checkFields()
     }
 
     fun save() {
