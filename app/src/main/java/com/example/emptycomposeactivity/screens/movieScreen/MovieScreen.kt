@@ -1,25 +1,44 @@
 package com.example.emptycomposeactivity.screens.movieScreen
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterStart
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -29,8 +48,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.emptycomposeactivity.R
-import com.example.emptycomposeactivity.navigation.Screens
-import com.example.emptycomposeactivity.ui.theme.*
+import com.example.emptycomposeactivity.screens.movieScreen.MovieViewModel.MovieScreenState
+import com.example.emptycomposeactivity.ui.theme.Black
+import com.example.emptycomposeactivity.ui.theme.DarkRed
+import com.example.emptycomposeactivity.ui.theme.IBM
+import com.example.emptycomposeactivity.ui.theme.TextGray
+import com.example.emptycomposeactivity.ui.theme.White
+import com.example.emptycomposeactivity.ui.theme.montserrat
 import com.google.accompanist.flowlayout.FlowRow
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.CollapsingToolbarScaffoldState
@@ -40,11 +64,13 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 @Composable
 fun MovieScreen(navController: NavController) {
     val viewModel: MovieViewModel = viewModel()
+    val uiState: MovieScreenState by remember { viewModel.uiState }
 
-    var heart = remember { viewModel.inFavorites }
+    var heart = remember { viewModel.uiState.value.inFavorites }
 
     reviewDialog(
         viewModel = viewModel,
+        state = uiState,
         { viewModel.onReviewChange(it) },
         { viewModel.changeAnon(it) })
 
@@ -112,7 +138,7 @@ fun MovieScreen(navController: NavController) {
                 genresButtons(viewModel)
             }
 
-            reviews(viewModel)
+            reviews(viewModel, uiState)
         }
     }
 }
@@ -168,18 +194,18 @@ fun backButton() {
 fun favoriteButton(
     viewModel: MovieViewModel,
     state: CollapsingToolbarScaffoldState,
-    heart: State<Boolean>
+    heart: Boolean
 ) {
     if (state.toolbarState.progress < 0.1) {
         IconButton(onClick = {
-            if (heart.value) {
+            if (heart) {
                 viewModel.deleteFavorites(viewModel.movieDetails!!.id)
             } else {
                 viewModel.addFavorites(viewModel.movieDetails!!.id)
             }
         }) {
             Icon(
-                if (heart.value) {
+                if (heart) {
                     Icons.Filled.Favorite
                 } else {
                     Icons.Outlined.FavoriteBorder
@@ -295,8 +321,8 @@ fun genresButtons(viewModel: MovieViewModel) {
 }
 
 @Composable
-fun reviews(viewModel: MovieViewModel) {
-    val userReviewExist = remember { viewModel.userReview }
+fun reviews(viewModel: MovieViewModel, state: MovieScreenState) {
+    val userReviewExist = remember { state.userReview }
 
     Box(
         modifier = Modifier
@@ -314,7 +340,7 @@ fun reviews(viewModel: MovieViewModel) {
                 .align(CenterStart)
         )
 
-        if (!userReviewExist.value) {
+        if (!userReviewExist) {
             IconButton(
                 modifier = Modifier.align(CenterEnd),
                 onClick = { viewModel.interactionWithReviewDialog(true) },
@@ -330,10 +356,10 @@ fun reviews(viewModel: MovieViewModel) {
 
     var userReview = viewModel.userReviewPosition
 
-    if (userReview != null && userReviewExist.value) {
-        listOfReviewsWithUsers(viewModel, userReview)
+    if (userReview != null && userReviewExist) {
+        listOfReviewsWithUsers(viewModel, state, userReview)
     } else {
-        listOfReviewsWithoutUsers(viewModel)
+        listOfReviewsWithoutUsers(viewModel, state)
     }
 }
 
@@ -386,9 +412,9 @@ fun addGenres(text: String) {
 }
 
 @Composable
-fun addUserReview(viewModel: MovieViewModel, userReview: Int) {
-    val reviewDescription = remember { viewModel.reviewText }
-    val reviewRating = remember { viewModel.rating }
+fun addUserReview(viewModel: MovieViewModel, state: MovieScreenState, userReview: Int) {
+    val reviewDescription = remember { state.reviewText }
+    val reviewRating = remember { state.rating }
 
     viewModel.correctDateTime(userReview)
     var image = ""
@@ -405,17 +431,22 @@ fun addUserReview(viewModel: MovieViewModel, userReview: Int) {
 
     ReviewCard(
         viewModel = viewModel,
+        state = state,
         image = image,
         nickName = nickName,
-        description = reviewDescription.value,
-        data = viewModel.createDateTime.value.toString(),
-        rating = reviewRating.value.toString(),
+        description = reviewDescription,
+        data = state.createDateTime,
+        rating = reviewRating.toString(),
         isUser = true
     )
 }
 
 @Composable
-fun listOfReviewsWithoutUsers(viewModel: MovieViewModel, userReview: Int? = -1) {
+fun listOfReviewsWithoutUsers(
+    viewModel: MovieViewModel,
+    state: MovieScreenState,
+    userReview: Int? = -1
+) {
     val countReviews = viewModel.movieDetails!!.reviews.size
 
     var curReview = 0
@@ -434,10 +465,11 @@ fun listOfReviewsWithoutUsers(viewModel: MovieViewModel, userReview: Int? = -1) 
             }
             ReviewCard(
                 viewModel = viewModel,
+                state = state,
                 image = image,
                 nickName = nickName,
                 description = viewModel.movieDetails!!.reviews[curReview].reviewText,
-                data = viewModel.createDateTime.value.toString(),
+                data = state.createDateTime,
                 rating = viewModel.movieDetails!!.reviews[curReview].rating.toString(),
                 isUser = false
             )
@@ -447,8 +479,8 @@ fun listOfReviewsWithoutUsers(viewModel: MovieViewModel, userReview: Int? = -1) 
 }
 
 @Composable
-fun listOfReviewsWithUsers(viewModel: MovieViewModel, userReview: Int) {
-    addUserReview(viewModel, userReview)
-    listOfReviewsWithoutUsers(viewModel = viewModel, userReview = userReview)
+fun listOfReviewsWithUsers(viewModel: MovieViewModel, state: MovieScreenState, userReview: Int) {
+    addUserReview(viewModel, state, userReview)
+    listOfReviewsWithoutUsers(viewModel = viewModel, state = state, userReview = userReview)
 }
 

@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Bottom
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import coil.compose.rememberAsyncImagePainter
 import com.example.emptycomposeactivity.R
+import com.example.emptycomposeactivity.screens.movieScreen.MovieViewModel.MovieScreenState
 import com.example.emptycomposeactivity.ui.theme.*
 
 
@@ -33,6 +33,7 @@ import com.example.emptycomposeactivity.ui.theme.*
 @Composable
 fun ReviewCard(
     viewModel: MovieViewModel,
+    state: MovieScreenState,
     image: String,
     nickName: String,
     description: String,
@@ -169,6 +170,7 @@ fun ReviewCard(
 
                     reviewDialog(
                         viewModel = viewModel,
+                        state = state,
                         { viewModel.onReviewChange(it) },
                         { viewModel.changeAnon(it) },
                         edit = true

@@ -1,11 +1,26 @@
 package com.example.emptycomposeactivity.screens.movieScreen
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,18 +31,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.emptycomposeactivity.R
-import com.example.emptycomposeactivity.ui.theme.*
+import com.example.emptycomposeactivity.screens.movieScreen.MovieViewModel.MovieScreenState
+import com.example.emptycomposeactivity.ui.theme.Black
+import com.example.emptycomposeactivity.ui.theme.DarkRed
+import com.example.emptycomposeactivity.ui.theme.Gray
+import com.example.emptycomposeactivity.ui.theme.GrayFaded
+import com.example.emptycomposeactivity.ui.theme.IBM
+import com.example.emptycomposeactivity.ui.theme.ReviewDialogBack
+import com.example.emptycomposeactivity.ui.theme.ReviewTextGray
+import com.example.emptycomposeactivity.ui.theme.White
 
 @Composable
 fun reviewDialog(
     viewModel: MovieViewModel,
+    state: MovieScreenState,
     onReviewChange: (String) -> Unit,
     changeAnon: (Boolean) -> Unit,
     edit: Boolean? = false
 ) {
-    val openDialog: Boolean by remember { viewModel.openReviewDialog }
-    val text: String by remember { viewModel.reviewText }
-    val checkedState: Boolean by remember { viewModel.checkedState }
+    val openDialog = remember { state.openReviewDialog }
+    val text = remember { state.reviewText }
+    val checkedState = remember { state.checkedState }
     if (openDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.interactionWithReviewDialog(false) },
@@ -45,7 +69,7 @@ fun reviewDialog(
                         fontWeight = FontWeight.Bold
                     )
 
-                    starRatingBar(viewModel = viewModel)
+                    starRatingBar(viewModel = viewModel, state = state)
                     OutlinedTextField(
                         value = text,
                         onValueChange = onReviewChange,
@@ -161,9 +185,10 @@ fun starRatingBar(
     stars: Int = 10,
     starsColor: Color = DarkRed,
     unfilledStarsColor: Color = Gray,
+    state: MovieScreenState,
     viewModel: MovieViewModel,
 ) {
-    val rating: Int by remember { viewModel.rating }
+    val rating = remember { state.rating }
     val filledStars = rating
     val unfilledStars = stars - rating
 

@@ -2,8 +2,6 @@ package com.example.emptycomposeactivity.screens.movieScreen
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.emptycomposeactivity.network.Network
@@ -19,28 +17,10 @@ class MovieViewModel : ViewModel() {
     val favoriteMovies = Network.favoriteMovies
     val profileData = Network.userData
 
-    private val _inFavorites = mutableStateOf(false)
-    var inFavorites: State<Boolean> = _inFavorites
-
-    private val _userReview = mutableStateOf(false)
-    var userReview: State<Boolean> = _userReview
-
     var userReviewPosition: Int? = null
 
-    private val _reviewText = mutableStateOf("")
-    var reviewText: State<String> = _reviewText
-
-    private val _createDateTime = MutableLiveData("")
-    var createDateTime: LiveData<String> = _createDateTime
-
-    private val _rating = mutableStateOf(0)
-    var rating: State<Int> = _rating
-
-    private val _openReviewDialog = mutableStateOf(false)
-    var openReviewDialog: State<Boolean> = _openReviewDialog
-
-    private val _checkedState = mutableStateOf(false)
-    var checkedState: State<Boolean> = _checkedState
+    private val _uiState = mutableStateOf(MovieScreenState())
+    var uiState: State<MovieScreenState> = _uiState
 
     init {
         checkFavoriteMovies()
@@ -51,11 +31,13 @@ class MovieViewModel : ViewModel() {
         var cur = 0
         while (cur != movieDetails!!.reviews.size) {
             if (profileData!!.id == movieDetails!!.reviews[cur].author?.userId) {
-                _userReview.value = true
+                _uiState.value = _uiState.value.copy(userReview = true)
                 userReviewPosition = cur
-                _reviewText.value = movieDetails!!.reviews[cur].reviewText
-                _checkedState.value = movieDetails!!.reviews[cur].isAnonymous
-                _rating.value = movieDetails!!.reviews[cur].rating
+                _uiState.value = _uiState.value.copy(
+                    reviewText = movieDetails!!.reviews[cur].reviewText,
+                    checkedState = movieDetails!!.reviews[cur].isAnonymous,
+                    rating = movieDetails!!.reviews[cur].rating
+                )
                 return
             }
             cur++
@@ -67,7 +49,7 @@ class MovieViewModel : ViewModel() {
             var cur = 0
             repeat(favoriteMovies.movies.size) {
                 if (movieDetails!!.id == favoriteMovies.movies[cur].id) {
-                    _inFavorites.value = true
+                    _uiState.value = _uiState.value.copy(inFavorites = true)
                     return
                 }
                 cur++
@@ -77,30 +59,31 @@ class MovieViewModel : ViewModel() {
 
     fun correctDateTime(cur: Int) {
         val inputData = movieDetails!!.reviews[cur].createDateTime.substringBefore("T").split('-')
-        _createDateTime.value = inputData[2] + "." + inputData[1] + "." + inputData[0]
+        _uiState.value =
+            _uiState.value.copy(createDateTime = inputData[2] + "." + inputData[1] + "." + inputData[0])
     }
 
     fun newRating(rating: Int) {
-        _rating.value = rating
+        _uiState.value = _uiState.value.copy(rating = rating)
     }
 
     fun changeAnon(changes: Boolean) {
-        _checkedState.value = !_checkedState.value
+        _uiState.value = _uiState.value.copy(checkedState = !_uiState.value.checkedState)
     }
 
     fun interactionWithReviewDialog(status: Boolean) {
-        _openReviewDialog.value = status
+        _uiState.value = _uiState.value.copy(openReviewDialog = status)
     }
 
     fun onReviewChange(text: String) {
-        _reviewText.value = text
+        _uiState.value = _uiState.value.copy(reviewText = text)
     }
 
     fun deleteFavorites(id: String) {
         val repositoryFavoriteMovies = FavoriteMoviesRepository()
         viewModelScope.launch {
             repositoryFavoriteMovies.deleteFavoriteMovies(id)
-            _inFavorites.value = false
+            _uiState.value = _uiState.value.copy(inFavorites = false)
             repositoryFavoriteMovies.getFavoriteMovies()
         }
     }
@@ -109,7 +92,7 @@ class MovieViewModel : ViewModel() {
         val repositoryFavoriteMovies = FavoriteMoviesRepository()
         viewModelScope.launch {
             repositoryFavoriteMovies.postFavoriteMovies(id)
-            _inFavorites.value = true
+            _uiState.value = _uiState.value.copy(inFavorites = true)
             repositoryFavoriteMovies.getFavoriteMovies()
         }
     }
@@ -120,9 +103,9 @@ class MovieViewModel : ViewModel() {
         viewModelScope.launch {
             repositoryReview.addReview(
                 movieDetails!!.id, ReviewBody(
-                    reviewText = _reviewText.value,
-                    rating = _rating.value,
-                    isAnonymous = _checkedState.value
+                    reviewText = _uiState.value.reviewText,
+                    rating = _uiState.value.rating,
+                    isAnonymous = _uiState.value.checkedState
                 )
             )
             repositoryMovies.getDetails(movieDetails!!.id).collect {}
@@ -138,9 +121,9 @@ class MovieViewModel : ViewModel() {
                 movieDetails!!.id,
                 Network.movieDetail!!.reviews[userReviewPosition!!].id,
                 ReviewBody(
-                    reviewText = _reviewText.value,
-                    rating = _rating.value,
-                    isAnonymous = _checkedState.value
+                    reviewText = _uiState.value.reviewText,
+                    rating = _uiState.value.rating,
+                    isAnonymous = _uiState.value.checkedState
                 )
             )
         }
@@ -159,12 +142,24 @@ class MovieViewModel : ViewModel() {
             viewModelScope.launch {
                 repositoryMovies.getDetails(movieDetails!!.id).collect {}
                 userReviewPosition = null
-                _userReview.value = false
-                _reviewText.value = ""
-                _checkedState.value = false
-                _rating.value = 0
+                _uiState.value = _uiState.value.copy(
+                    userReview = false,
+                    reviewText = "",
+                    checkedState = false,
+                    rating = 0
+                )
                 movieDetails = Network.movieDetail
             }
         }
     }
+
+    data class MovieScreenState(
+        val inFavorites: Boolean = false,
+        val userReview: Boolean = false,
+        val reviewText: String = "",
+        val createDateTime: String = "",
+        val rating: Int = 0,
+        val openReviewDialog: Boolean = false,
+        val checkedState: Boolean = false
+    )
 }
