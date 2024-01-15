@@ -40,6 +40,10 @@ class ProfileViewModel : ViewModel() {
     private var dataChange = false
 
     init {
+        updateUiState()
+    }
+
+    private fun updateUiState() {
         if (userData != null) {
             birthdayForOutput()
             _uiState.value = _uiState.value.copy(
@@ -208,17 +212,7 @@ class ProfileViewModel : ViewModel() {
             )
             repositoryUser.getUserData().collect {
                 userData = it
-                if (userData != null) {
-                    birthdayForOutput()
-                    _uiState.value = _uiState.value.copy(
-                        nick = userData!!.nickName,
-                        email = userData!!.email,
-                        name = userData!!.name,
-                        url = userData!!.avatarLink
-                    )
-                    _gender = userData!!.gender.toGender()
-                    checkGender()
-                }
+                updateUiState()
             }
             _uiState.value = _uiState.value.copy(
                 allFieldsFilled = false
