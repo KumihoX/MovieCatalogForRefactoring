@@ -12,7 +12,8 @@ import com.example.emptycomposeactivity.network.user.UserRepository
 import com.example.emptycomposeactivity.screens.enums.Gender
 import com.example.emptycomposeactivity.screens.enums.toGender
 import com.example.emptycomposeactivity.screens.enums.toInt
-import com.example.emptycomposeactivity.screens.ext.toRequiredDateFormat
+import com.example.emptycomposeactivity.screens.ext.convertToRequiredExternalDateFormat
+import com.example.emptycomposeactivity.screens.ext.convertToRequiredUIDateFormat
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
@@ -53,11 +54,9 @@ class ProfileViewModel : ViewModel() {
     }
 
     private fun birthdayForOutput() {
-        val dataInBirthday = userData!!.birthDate.substringBefore("T").split('-')
-        _uiState.value =
-            _uiState.value.copy(dateOfBirth = dataInBirthday[2] + "." + dataInBirthday[1] + "." + dataInBirthday[0])
-
-        startBirthday = _uiState.value.dateOfBirth
+        val dataInBirthday = userData!!.birthDate.convertToRequiredUIDateFormat()
+        _uiState.value = _uiState.value.copy(dateOfBirth = dataInBirthday)
+        startBirthday = dataInBirthday
     }
 
 
@@ -167,7 +166,7 @@ class ProfileViewModel : ViewModel() {
 
     fun save() {
         val repositoryUser = UserRepository()
-        correctBirthday = _uiState.value.dateOfBirth.toRequiredDateFormat()
+        correctBirthday = _uiState.value.dateOfBirth.convertToRequiredExternalDateFormat()
 
         viewModelScope.launch {
             repositoryUser.putUserData(

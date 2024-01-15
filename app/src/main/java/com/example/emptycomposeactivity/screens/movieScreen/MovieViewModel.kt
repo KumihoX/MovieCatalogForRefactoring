@@ -9,6 +9,7 @@ import com.example.emptycomposeactivity.network.favoriteMovies.FavoriteMoviesRep
 import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.network.review.ReviewBody
 import com.example.emptycomposeactivity.network.review.ReviewRepository
+import com.example.emptycomposeactivity.screens.ext.convertToRequiredUIDateFormat
 import kotlinx.coroutines.launch
 
 class MovieViewModel : ViewModel() {
@@ -58,9 +59,8 @@ class MovieViewModel : ViewModel() {
     }
 
     fun correctDateTime(cur: Int) {
-        val inputData = movieDetails!!.reviews[cur].createDateTime.substringBefore("T").split('-')
-        _uiState.value =
-            _uiState.value.copy(createDateTime = inputData[2] + "." + inputData[1] + "." + inputData[0])
+        val inputData = movieDetails!!.reviews[cur].createDateTime.convertToRequiredUIDateFormat()
+        _uiState.value = _uiState.value.copy(createDateTime = inputData)
     }
 
     fun newRating(rating: Int) {

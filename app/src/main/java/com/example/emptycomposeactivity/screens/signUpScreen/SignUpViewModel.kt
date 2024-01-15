@@ -15,7 +15,7 @@ import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.network.user.UserRepository
 import com.example.emptycomposeactivity.screens.enums.Gender
 import com.example.emptycomposeactivity.screens.enums.toInt
-import com.example.emptycomposeactivity.screens.ext.toRequiredDateFormat
+import com.example.emptycomposeactivity.screens.ext.convertToRequiredExternalDateFormat
 import kotlinx.coroutines.launch
 
 class SignUpViewModel : ViewModel() {
@@ -149,7 +149,7 @@ class SignUpViewModel : ViewModel() {
         val repositoryMovies = MoviesRepository()
         val repositoryUser = UserRepository()
 
-        correctBirthday = _uiState.value.dateOfBirth.toRequiredDateFormat()
+        correctBirthday = _uiState.value.dateOfBirth.convertToRequiredExternalDateFormat()
 
         viewModelScope.launch {
             repositoryAuth.register(
