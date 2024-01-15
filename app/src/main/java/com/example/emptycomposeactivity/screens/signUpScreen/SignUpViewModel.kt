@@ -16,6 +16,7 @@ import com.example.emptycomposeactivity.network.auth.RegisterRequestBody
 import com.example.emptycomposeactivity.network.favoriteMovies.FavoriteMoviesRepository
 import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.network.user.UserRepository
+import com.example.emptycomposeactivity.screens.ext.toRequiredDateFormat
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -51,17 +52,6 @@ class SignUpViewModel : ViewModel() {
                 1
             } else 0
         } else -1
-    }
-
-    private fun correctBirth() {
-        val list = _uiState.value.dateOfBirth.split(".").toMutableList()
-        if (list[0].toInt() < 10) {
-            list[0] = "0" + list[0]
-        }
-        if (list[1].toInt() < 10) {
-            list[1] = "0" + list[1]
-        }
-        correctBirthday = list[2] + "-" + list[1] + "-" + list[0]
     }
 
     private fun checkFields() {
@@ -180,7 +170,9 @@ class SignUpViewModel : ViewModel() {
         val repositoryFavoriteMovies = FavoriteMoviesRepository()
         val repositoryMovies = MoviesRepository()
         val repositoryUser = UserRepository()
-        correctBirth()
+
+        correctBirthday = _uiState.value.dateOfBirth.toRequiredDateFormat()
+
         viewModelScope.launch {
             repositoryAuth.register(
                 RegisterRequestBody(

@@ -13,6 +13,7 @@ import com.example.emptycomposeactivity.network.Network
 import com.example.emptycomposeactivity.network.auth.AuthRepository
 import com.example.emptycomposeactivity.network.user.UserData
 import com.example.emptycomposeactivity.network.user.UserRepository
+import com.example.emptycomposeactivity.screens.ext.toRequiredDateFormat
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -92,7 +93,6 @@ class ProfileViewModel : ViewModel() {
     }
 
     private fun checkFields() {
-
         changes()
 
         val email = _uiState.value.email
@@ -105,17 +105,6 @@ class ProfileViewModel : ViewModel() {
                 _uiState.value.copy(allFieldsFilled = _uiState.value.correct == hasChanges)
         } else
             _uiState.value = _uiState.value.copy(allFieldsFilled = false)
-    }
-
-    private fun correctBirth() {
-        val list = _uiState.value.dateOfBirth.split(".").toMutableList()
-        if (list[0].toInt() < 10) {
-            list[0] = "0" + list[0].toInt().toString()
-        }
-        if (list[1].toInt() < 10) {
-            list[1] = "0" + list[1].toInt().toString()
-        }
-        correctBirthday = list[2] + "-" + list[1] + "-" + list[0]
     }
 
     fun onEmailChange(newEmail: String) {
@@ -195,7 +184,7 @@ class ProfileViewModel : ViewModel() {
 
     fun save() {
         val repositoryUser = UserRepository()
-        correctBirth()
+        correctBirthday = _uiState.value.dateOfBirth.toRequiredDateFormat()
 
         viewModelScope.launch {
             repositoryUser.putUserData(
