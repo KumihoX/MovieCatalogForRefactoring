@@ -30,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.emptycomposeactivity.R
 import com.example.emptycomposeactivity.navigation.Screens
+import com.example.emptycomposeactivity.screens.components.BirthdayPickerDialog
 import com.example.emptycomposeactivity.screens.components.GenderButton
 import com.example.emptycomposeactivity.screens.signUpScreen.SignUpViewModel.SignUpScreenState
 import com.example.emptycomposeactivity.ui.theme.*
@@ -41,6 +42,7 @@ fun SignUpScreen(navController: NavController) {
 
     val signUpViewModel: SignUpViewModel = viewModel()
     val state: SignUpScreenState by remember { signUpViewModel.uiState }
+    var showDataPickerDialogState: Boolean by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -70,7 +72,7 @@ fun SignUpScreen(navController: NavController) {
         { signUpViewModel.onConfirmPasswordChange(it) }
 
         SignUpDateOfBirthField(state = state)
-        { signUpViewModel.showDatePickerDialog(it) }
+        { showDataPickerDialogState = true }
 
         GenderButton(
             selectedMan = remember(state.manIsPressed) { state.manIsPressed },
@@ -87,6 +89,16 @@ fun SignUpScreen(navController: NavController) {
 
             SignUpIHaveAcc(navController)
         }
+    }
+
+    if (showDataPickerDialogState) {
+        BirthdayPickerDialog(onBirthdateChange = { day, month, year ->
+            signUpViewModel.onBirthdateChange(
+                day,
+                month,
+                year
+            )
+        })
     }
 }
 

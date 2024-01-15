@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.emptycomposeactivity.R
+import com.example.emptycomposeactivity.screens.components.BirthdayPickerDialog
 import com.example.emptycomposeactivity.screens.components.GenderButton
 import com.example.emptycomposeactivity.screens.profileScreen.ProfileViewModel.ProfileScreenState
 import com.example.emptycomposeactivity.ui.theme.*
@@ -36,6 +37,7 @@ fun ProfileScreen(logout: () -> Unit) {
     val viewModel = ProfileViewModel()
 
     val state: ProfileScreenState by remember { viewModel.uiState }
+    var showDataPickerDialogState: Boolean by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -51,7 +53,7 @@ fun ProfileScreen(logout: () -> Unit) {
         ProfileName(state = state, viewModel = viewModel) { viewModel.onNameChange(it) }
 
         ProfileDateOfBirth(state = state)
-        { viewModel.showDatePickerDialog(it) }
+        { showDataPickerDialogState = true }
 
         GenderButton(
             selectedMan = remember(state.manIsPressed) { state.manIsPressed },
@@ -65,6 +67,16 @@ fun ProfileScreen(logout: () -> Unit) {
             ProfileSave(state = state) { viewModel.save() }
             LogOut(viewModel = viewModel) { logout() }
         }
+    }
+
+    if (showDataPickerDialogState) {
+        BirthdayPickerDialog(onBirthdateChange = { day, month, year ->
+            viewModel.onBirthdateChange(
+                day,
+                month,
+                year
+            )
+        })
     }
 }
 

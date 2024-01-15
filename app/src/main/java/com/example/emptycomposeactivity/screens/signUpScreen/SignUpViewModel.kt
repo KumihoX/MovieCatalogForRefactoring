@@ -1,8 +1,5 @@
 package com.example.emptycomposeactivity.screens.signUpScreen
 
-import android.app.DatePickerDialog
-import android.content.Context
-import android.widget.DatePicker
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -20,8 +17,6 @@ import com.example.emptycomposeactivity.screens.enums.Gender
 import com.example.emptycomposeactivity.screens.enums.toInt
 import com.example.emptycomposeactivity.screens.ext.toRequiredDateFormat
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import java.util.Date
 
 class SignUpViewModel : ViewModel() {
 
@@ -116,34 +111,10 @@ class SignUpViewModel : ViewModel() {
         checkFields()
     }
 
-    fun showDatePickerDialog(context: Context) {
-        val year: Int
-        val month: Int
-        val day: Int
-
-        val calendar = Calendar.getInstance()
-
-        year = calendar.get(Calendar.YEAR)
-        month = calendar.get(Calendar.MONTH)
-        day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        calendar.time = Date()
-
-        val mDatePickerDialog = DatePickerDialog(
-            context,
-            R.style.MyDatePickerDialogTheme,
-            { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-                _uiState.value = _uiState.value.copy(
-                    dateOfBirth = "$mDayOfMonth.${mMonth + 1}.$mYear"
-                )
-                checkFields()
-            },
-            year,
-            month,
-            day
-        )
-
-        mDatePickerDialog.show()
+    fun onBirthdateChange(day: Int, month: Int, year: Int) {
+        _uiState.value =
+            _uiState.value.copy(dateOfBirth = "$day.${month + 1}.$year")
+        checkFields()
     }
 
     fun buttonGenderIsPressed(who: Gender) {
