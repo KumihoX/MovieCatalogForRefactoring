@@ -13,6 +13,9 @@ import com.example.emptycomposeactivity.network.Network
 import com.example.emptycomposeactivity.network.auth.AuthRepository
 import com.example.emptycomposeactivity.network.user.UserData
 import com.example.emptycomposeactivity.network.user.UserRepository
+import com.example.emptycomposeactivity.screens.enums.Gender
+import com.example.emptycomposeactivity.screens.enums.toGender
+import com.example.emptycomposeactivity.screens.enums.toInt
 import com.example.emptycomposeactivity.screens.ext.toRequiredDateFormat
 import kotlinx.coroutines.launch
 import java.util.*
@@ -26,7 +29,7 @@ class ProfileViewModel : ViewModel() {
     private val _uiState = mutableStateOf(ProfileScreenState())
     var uiState: State<ProfileScreenState> = _uiState
 
-    private var _gender = 0
+    private var _gender = Gender.NOT_SELECTED
 
     private var correctBirthday: String = ""
 
@@ -45,7 +48,7 @@ class ProfileViewModel : ViewModel() {
                 name = userData!!.name,
                 url = userData!!.avatarLink,
             )
-            _gender = userData!!.gender
+            _gender = userData!!.gender.toGender()
             checkGender()
         }
     }
@@ -66,7 +69,7 @@ class ProfileViewModel : ViewModel() {
     }
 
     private fun checkGender() {
-        if (_gender == 1) {
+        if (_gender == Gender.WOMAN) {
             _uiState.value = _uiState.value.copy(womanIsPressed = true)
         } else
             _uiState.value = _uiState.value.copy(manIsPressed = true)
@@ -87,7 +90,7 @@ class ProfileViewModel : ViewModel() {
         with(_uiState.value) {
             hasChanges = email != userData!!.email || url != userData!!.avatarLink ||
                     name != userData!!.name || dataChange ||
-                    _gender != userData!!.gender
+                    _gender != userData!!.gender.toGender()
         }
 
     }
@@ -161,22 +164,27 @@ class ProfileViewModel : ViewModel() {
         mDatePickerDialog.show()
     }
 
-    fun buttonGenderIsPressed(who: Int) {
+    fun buttonGenderIsPressed(who: Gender) {
         when (who) {
-            1 -> {
+            Gender.MAN -> {
                 _uiState.value = _uiState.value.copy(
                     manIsPressed = true,
                     womanIsPressed = false
                 )
-                _gender = 0
             }
 
-            2 -> {
+            Gender.WOMAN -> {
                 _uiState.value = _uiState.value.copy(
                     manIsPressed = false,
                     womanIsPressed = true
                 )
-                _gender = 1
+            }
+
+            Gender.NOT_SELECTED -> {
+                _uiState.value = _uiState.value.copy(
+                    manIsPressed = false,
+                    womanIsPressed = false
+                )
             }
         }
         checkFields()
@@ -195,7 +203,7 @@ class ProfileViewModel : ViewModel() {
                     avatarLink = _uiState.value.url,
                     name = _uiState.value.name,
                     birthDate = correctBirthday,
-                    gender = _gender
+                    gender = _gender.toInt()
                 )
             )
             repositoryUser.getUserData().collect {
@@ -208,7 +216,7 @@ class ProfileViewModel : ViewModel() {
                         name = userData!!.name,
                         url = userData!!.avatarLink
                     )
-                    _gender = userData!!.gender
+                    _gender = userData!!.gender.toGender()
                     checkGender()
                 }
             }

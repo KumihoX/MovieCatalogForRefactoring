@@ -16,6 +16,8 @@ import com.example.emptycomposeactivity.network.auth.RegisterRequestBody
 import com.example.emptycomposeactivity.network.favoriteMovies.FavoriteMoviesRepository
 import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.network.user.UserRepository
+import com.example.emptycomposeactivity.screens.enums.Gender
+import com.example.emptycomposeactivity.screens.enums.toInt
 import com.example.emptycomposeactivity.screens.ext.toRequiredDateFormat
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -31,7 +33,7 @@ class SignUpViewModel : ViewModel() {
     private val _uiState = mutableStateOf(SignUpScreenState())
     var uiState: State<SignUpScreenState> = _uiState
 
-    private var _gender: Int = -1
+    private var _gender: Gender = Gender.NOT_SELECTED
     private var correctBirthday: String = ""
 
     private fun passwordComparison() {
@@ -48,10 +50,8 @@ class SignUpViewModel : ViewModel() {
 
     private fun checkGender() {
         _gender = if (_uiState.value.manIsPressed || _uiState.value.womanIsPressed) {
-            if (_uiState.value.womanIsPressed) {
-                1
-            } else 0
-        } else -1
+            if (_uiState.value.womanIsPressed) Gender.WOMAN else Gender.MAN
+        } else Gender.NOT_SELECTED
     }
 
     private fun checkFields() {
@@ -65,7 +65,7 @@ class SignUpViewModel : ViewModel() {
         checkGender()
 
         if (login.isNotEmpty() && email.isNotEmpty() && name.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && dateOfBirth.isNotEmpty() && !notValidPassword) {
-            if (_gender != -1) {
+            if (_gender != Gender.NOT_SELECTED) {
                 _uiState.value = _uiState.value.copy(
                     allFieldsFilled = _uiState.value.equality == _uiState.value.correct
                 )
@@ -146,19 +146,26 @@ class SignUpViewModel : ViewModel() {
         mDatePickerDialog.show()
     }
 
-    fun buttonGenderIsPressed(who: Int) {
+    fun buttonGenderIsPressed(who: Gender) {
         when (who) {
-            1 -> {
+            Gender.MAN -> {
                 _uiState.value = _uiState.value.copy(
                     manIsPressed = true,
                     womanIsPressed = false
                 )
             }
 
-            2 -> {
+            Gender.WOMAN -> {
                 _uiState.value = _uiState.value.copy(
                     manIsPressed = false,
                     womanIsPressed = true
+                )
+            }
+
+            Gender.NOT_SELECTED -> {
+                _uiState.value = _uiState.value.copy(
+                    manIsPressed = false,
+                    womanIsPressed = false
                 )
             }
         }
@@ -181,7 +188,7 @@ class SignUpViewModel : ViewModel() {
                     password = _uiState.value.password,
                     email = _uiState.value.email,
                     birthDate = correctBirthday,
-                    gender = _gender
+                    gender = _gender.toInt()
                 )
             ).collect {}
 

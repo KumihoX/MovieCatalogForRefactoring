@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.emptycomposeactivity.R
+import com.example.emptycomposeactivity.screens.enums.Gender
 import com.example.emptycomposeactivity.ui.theme.Black
 import com.example.emptycomposeactivity.ui.theme.DarkRed
 import com.example.emptycomposeactivity.ui.theme.White
@@ -29,7 +30,7 @@ import com.example.emptycomposeactivity.ui.theme.White
 fun GenderButton(
     selectedWoman: Boolean,
     selectedMan: Boolean,
-    buttonGenderIsPressed: (Int) -> Unit
+    buttonGenderIsPressed: (Gender) -> Unit
 ) {
     val womanBack =
         if (selectedWoman) DarkRed else Black
@@ -43,7 +44,7 @@ fun GenderButton(
             .border(1.dp, White, RoundedCornerShape(8.dp))
     ) {
         Button(
-            onClick = { buttonGenderIsPressed(1) },
+            onClick = { buttonGenderIsPressed(Gender.MAN) },
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize(),
@@ -69,7 +70,7 @@ fun GenderButton(
         )
 
         Button(
-            onClick = { buttonGenderIsPressed(2) },
+            onClick = { buttonGenderIsPressed(Gender.WOMAN) },
             shape = RoundedCornerShape(0.dp, 8.dp, 8.dp, 0.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = womanBack,
