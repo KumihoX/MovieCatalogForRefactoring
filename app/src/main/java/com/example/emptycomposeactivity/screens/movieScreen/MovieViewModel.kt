@@ -16,9 +16,9 @@ class MovieViewModel : ViewModel() {
 
     var movieDetails = Network.movieDetail
     val favoriteMovies = Network.favoriteMovies
-    val profileData = Network.userData
-
     var userReviewPosition: Int? = null
+
+    private val profileData = Network.userData
 
     private val _uiState = mutableStateOf(MovieScreenState())
     var uiState: State<MovieScreenState> = _uiState
@@ -28,7 +28,7 @@ class MovieViewModel : ViewModel() {
         checkReviews()
     }
 
-    fun checkReviews() {
+    private fun checkReviews() {
         var cur = 0
         while (cur != movieDetails!!.reviews.size) {
             if (profileData!!.id == movieDetails!!.reviews[cur].author?.userId) {

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.emptycomposeactivity.network.Network
 import com.example.emptycomposeactivity.network.favoriteMovies.FavoriteMoviesRepository
 import com.example.emptycomposeactivity.network.favoriteMovies.ShortMovie
-import com.example.emptycomposeactivity.network.movies.MoviesDescription
 import com.example.emptycomposeactivity.network.movies.MoviesGenres
 import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.network.movies.MoviesReviews
@@ -20,8 +19,8 @@ class MainViewModel : ViewModel() {
 
     var rating: Float = 0f
 
-    var currentListOfMovies = Network.movies
-    var currentListOfFavorites = Network.favoriteMovies
+    private var currentListOfMovies = Network.movies
+    private var currentListOfFavorites = Network.favoriteMovies
 
     private val _sizeMovieList = mutableStateOf(0)
     var sizeMovieList: State<Int> = _sizeMovieList

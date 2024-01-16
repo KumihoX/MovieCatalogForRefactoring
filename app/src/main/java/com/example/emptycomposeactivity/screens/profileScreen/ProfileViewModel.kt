@@ -17,13 +17,14 @@ import com.example.emptycomposeactivity.screens.ext.convertToRequiredUIDateForma
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
-    var userData = Network.userData
 
     val emptyMessage = R.string.empty
     val invalidEmailMessage = R.string.wrong_email
 
     private val _uiState = mutableStateOf(ProfileScreenState())
     var uiState: State<ProfileScreenState> = _uiState
+
+    private var userData = Network.userData
 
     private var _gender = Gender.NOT_SELECTED
 
