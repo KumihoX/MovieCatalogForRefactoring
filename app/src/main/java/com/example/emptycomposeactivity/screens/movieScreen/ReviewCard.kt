@@ -96,7 +96,7 @@ fun ReviewCard(
 
                 if (isUser) {
                     // Окно для изменения отзыва
-                    reviewDialog(
+                    ReviewDialog(
                         viewModel = viewModel,
                         state = state,
                         { viewModel.onReviewChange(it) },

@@ -67,7 +67,7 @@ fun MovieScreen() {
 
     var heart = remember { viewModel.uiState.value.inFavorites }
 
-    reviewDialog(
+    ReviewDialog(
         viewModel = viewModel,
         state = uiState,
         { viewModel.onReviewChange(it) },
@@ -88,7 +88,7 @@ fun MovieScreen() {
                     .pin()
             )
             {
-                moviePoster(viewModel = viewModel, state = state)
+                MoviePoster(viewModel = viewModel, state = state)
             }
 
             val textSize = (24 + (30 - 18) * state.toolbarState.progress).sp
@@ -117,8 +117,8 @@ fun MovieScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-                backButton()
-                favoriteButton(viewModel, state, heart)
+                BackButton()
+                FavoriteButton(viewModel, state, heart)
             }
         })
     {
@@ -128,22 +128,22 @@ fun MovieScreen() {
                 .fillMaxWidth()
         )
         {
-            movieDescription(viewModel)
-            aboutFilm()
-            movieInformation(viewModel)
-            genres()
+            MovieDescription(viewModel)
+            AboutFilm()
+            MovieInformation(viewModel)
+            Genres()
 
             FlowRow(modifier = Modifier.padding(16.dp, 0.dp)) {
-                genresButtons(viewModel)
+                GenresButtons(viewModel)
             }
 
-            reviews(viewModel, uiState)
+            Reviews(viewModel, uiState)
         }
     }
 }
 
 @Composable
-fun moviePoster(
+fun MoviePoster(
     viewModel: MovieViewModel,
     state: CollapsingToolbarScaffoldState
 ) {
@@ -178,7 +178,7 @@ fun moviePoster(
 
 
 @Composable
-fun backButton() {
+fun BackButton() {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     IconButton(onClick = { onBackPressedDispatcher?.onBackPressed() }) {
         Icon(
@@ -190,7 +190,7 @@ fun backButton() {
 }
 
 @Composable
-fun favoriteButton(
+fun FavoriteButton(
     viewModel: MovieViewModel,
     state: CollapsingToolbarScaffoldState,
     heart: Boolean
@@ -217,7 +217,7 @@ fun favoriteButton(
 }
 
 @Composable
-fun movieDescription(viewModel: MovieViewModel) {
+fun MovieDescription(viewModel: MovieViewModel) {
     Text(
         text = if (viewModel.movieDetails!!.description!!.isNotEmpty())
             viewModel.movieDetails!!.description
@@ -231,7 +231,7 @@ fun movieDescription(viewModel: MovieViewModel) {
 }
 
 @Composable
-fun aboutFilm() {
+fun AboutFilm() {
     Text(
         text = stringResource(R.string.about_film),
         color = White,
@@ -243,58 +243,58 @@ fun aboutFilm() {
 }
 
 @Composable
-fun movieInformation(viewModel: MovieViewModel) {
+fun MovieInformation(viewModel: MovieViewModel) {
     Column(modifier = Modifier.padding(16.dp, 0.dp)) {
         Row(modifier = Modifier.padding(0.dp, 2.dp))
         {
-            addText(text = stringResource(R.string.year))
-            addData(text = viewModel.movieDetails!!.year.toString())
+            AddText(text = stringResource(R.string.year))
+            AddData(text = viewModel.movieDetails!!.year.toString())
         }
         Row(modifier = Modifier.padding(0.dp, 2.dp))
         {
-            addText(text = stringResource(R.string.country))
-            addData(text = viewModel.movieDetails!!.country)
+            AddText(text = stringResource(R.string.country))
+            AddData(text = viewModel.movieDetails!!.country)
         }
         Row(modifier = Modifier.padding(0.dp, 2.dp))
         {
-            addText(text = stringResource(R.string.time))
+            AddText(text = stringResource(R.string.time))
             val text = viewModel.movieDetails!!.time.toString()
-            addData(text = "$text мин.")
+            AddData(text = "$text мин.")
         }
         Row(modifier = Modifier.padding(0.dp, 2.dp))
         {
-            addText(text = stringResource(R.string.tagline))
+            AddText(text = stringResource(R.string.tagline))
             val text = viewModel.movieDetails!!.tagline
-            addData(text = "\" $text \"")
+            AddData(text = "\" $text \"")
         }
         Row(modifier = Modifier.padding(0.dp, 2.dp))
         {
-            addText(text = stringResource(R.string.director))
-            addData(text = viewModel.movieDetails!!.director)
+            AddText(text = stringResource(R.string.director))
+            AddData(text = viewModel.movieDetails!!.director)
         }
         Row(modifier = Modifier.padding(0.dp, 2.dp))
         {
-            addText(text = stringResource(R.string.budget))
+            AddText(text = stringResource(R.string.budget))
             val text = viewModel.movieDetails!!.budget.toString()
-            addData(text = "$ $text")
+            AddData(text = "$ $text")
         }
         Row(modifier = Modifier.padding(0.dp, 2.dp))
         {
-            addText(text = stringResource(R.string.fees))
+            AddText(text = stringResource(R.string.fees))
             val text = viewModel.movieDetails!!.fees.toString()
-            addData(text = "$ $text")
+            AddData(text = "$ $text")
         }
         Row()
         {
-            addText(text = stringResource(R.string.age))
+            AddText(text = stringResource(R.string.age))
             val text = viewModel.movieDetails!!.ageLimit.toString()
-            addData(text = "$text+")
+            AddData(text = "$text+")
         }
     }
 }
 
 @Composable
-fun genres() {
+fun Genres() {
     Text(
         text = stringResource(R.string.genres),
         color = White,
@@ -306,21 +306,21 @@ fun genres() {
 }
 
 @Composable
-fun genresButtons(viewModel: MovieViewModel) {
+fun GenresButtons(viewModel: MovieViewModel) {
     if (viewModel.movieDetails!!.genres!!.isNotEmpty()) {
         val sizeGenres = viewModel.movieDetails!!.genres!!.size
 
         var curGenre = 0
         while (curGenre != sizeGenres) {
             val text = viewModel.movieDetails!!.genres[curGenre].name
-            addGenres(text = "$text")
+            AddGenres(text = "$text")
             curGenre++
         }
     }
 }
 
 @Composable
-fun reviews(viewModel: MovieViewModel, state: MovieScreenState) {
+fun Reviews(viewModel: MovieViewModel, state: MovieScreenState) {
     val userReviewExist = remember { state.userReview }
 
     Box(
@@ -356,14 +356,14 @@ fun reviews(viewModel: MovieViewModel, state: MovieScreenState) {
     var userReview = viewModel.userReviewPosition
 
     if (userReview != null && userReviewExist) {
-        listOfReviewsWithUsers(viewModel, state, userReview)
+        ListOfReviewsWithUsers(viewModel, state, userReview)
     } else {
-        listOfReviewsWithoutUsers(viewModel, state)
+        ListOfReviewsWithoutUsers(viewModel, state)
     }
 }
 
 @Composable
-fun addText(text: String) {
+fun AddText(text: String) {
     Text(
         text = text,
         modifier = Modifier.width(100.dp),
@@ -375,7 +375,7 @@ fun addText(text: String) {
 }
 
 @Composable
-fun addData(text: String) {
+fun AddData(text: String) {
     Text(
         text = text,
         modifier = Modifier
@@ -389,7 +389,7 @@ fun addData(text: String) {
 }
 
 @Composable
-fun addGenres(text: String) {
+fun AddGenres(text: String) {
     Button(
         modifier = Modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
         onClick = {},
@@ -411,7 +411,7 @@ fun addGenres(text: String) {
 }
 
 @Composable
-fun addUserReview(viewModel: MovieViewModel, state: MovieScreenState, userReview: Int) {
+fun AddUserReview(viewModel: MovieViewModel, state: MovieScreenState, userReview: Int) {
     val reviewDescription = remember { state.reviewText }
     val reviewRating = remember { state.rating }
 
@@ -441,7 +441,7 @@ fun addUserReview(viewModel: MovieViewModel, state: MovieScreenState, userReview
 }
 
 @Composable
-fun listOfReviewsWithoutUsers(
+fun ListOfReviewsWithoutUsers(
     viewModel: MovieViewModel,
     state: MovieScreenState,
     userReview: Int? = -1
@@ -478,8 +478,8 @@ fun listOfReviewsWithoutUsers(
 }
 
 @Composable
-fun listOfReviewsWithUsers(viewModel: MovieViewModel, state: MovieScreenState, userReview: Int) {
-    addUserReview(viewModel, state, userReview)
-    listOfReviewsWithoutUsers(viewModel = viewModel, state = state, userReview = userReview)
+fun ListOfReviewsWithUsers(viewModel: MovieViewModel, state: MovieScreenState, userReview: Int) {
+    AddUserReview(viewModel, state, userReview)
+    ListOfReviewsWithoutUsers(viewModel = viewModel, state = state, userReview = userReview)
 }
 

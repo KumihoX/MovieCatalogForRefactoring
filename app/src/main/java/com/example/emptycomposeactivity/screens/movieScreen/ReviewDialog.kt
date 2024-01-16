@@ -42,7 +42,7 @@ import com.example.emptycomposeactivity.ui.theme.ReviewTextGray
 import com.example.emptycomposeactivity.ui.theme.White
 
 @Composable
-fun reviewDialog(
+fun ReviewDialog(
     viewModel: MovieViewModel,
     state: MovieScreenState,
     onReviewChange: (String) -> Unit,
@@ -69,7 +69,7 @@ fun reviewDialog(
                         fontWeight = FontWeight.Bold
                     )
 
-                    starRatingBar(viewModel = viewModel, state = state)
+                    StarRatingBar(viewModel = viewModel, state = state)
                     OutlinedTextField(
                         value = text,
                         onValueChange = onReviewChange,
@@ -180,7 +180,7 @@ fun reviewDialog(
 }
 
 @Composable
-fun starRatingBar(
+fun StarRatingBar(
     modifier: Modifier = Modifier,
     stars: Int = 10,
     starsColor: Color = DarkRed,
