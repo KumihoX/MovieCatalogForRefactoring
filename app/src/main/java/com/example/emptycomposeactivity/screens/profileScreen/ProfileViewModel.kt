@@ -15,6 +15,7 @@ import com.example.emptycomposeactivity.screens.enums.toInt
 import com.example.emptycomposeactivity.screens.ext.convertToRequiredExternalDateFormat
 import com.example.emptycomposeactivity.screens.ext.convertToRequiredUIDateFormat
 import com.example.emptycomposeactivity.screens.validation.checkEmail
+import com.example.emptycomposeactivity.screens.validation.checkFieldsOnEmptiness
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
@@ -91,16 +92,17 @@ class ProfileViewModel : ViewModel() {
     private fun checkFields() {
         changes()
 
-        val email = _uiState.value.email
-        val name = _uiState.value.name
-        val dateOfBirth = _uiState.value.dateOfBirth
+        val isAllFieldsNotEmpty = with(_uiState.value) {
+            checkFieldsOnEmptiness(
+                name = name,
+                email = email,
+                dateOfBirth = dateOfBirth
+            )
+        }
 
-        if (email.isNotEmpty() && name.isNotEmpty() && dateOfBirth.isNotEmpty()
-        ) {
-            _uiState.value =
-                _uiState.value.copy(allFieldsFilled = _uiState.value.correct == hasChanges)
-        } else
-            _uiState.value = _uiState.value.copy(allFieldsFilled = false)
+        _uiState.value =
+            _uiState.value.copy(allFieldsFilled = isAllFieldsNotEmpty == _uiState.value.correct == hasChanges)
+
     }
 
     fun onEmailChange(newEmail: String) {

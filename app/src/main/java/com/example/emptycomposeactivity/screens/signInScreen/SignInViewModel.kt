@@ -12,6 +12,7 @@ import com.example.emptycomposeactivity.network.auth.LoginRequestBody
 import com.example.emptycomposeactivity.network.favoriteMovies.FavoriteMoviesRepository
 import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.network.user.UserRepository
+import com.example.emptycomposeactivity.screens.validation.checkFieldsOnEmptiness
 import kotlinx.coroutines.launch
 
 class SignInViewModel : ViewModel() {
@@ -22,30 +23,27 @@ class SignInViewModel : ViewModel() {
     private val _uiState = mutableStateOf(SignInScreenState())
     var uiState: State<SignInScreenState> = _uiState
 
-    private fun checkFields() {
-        val login = _uiState.value.login
-        val password = _uiState.value.password
-        if (login != "" && password != "") {
-            _uiState.value =
-                _uiState.value.copy(allFieldsFilled = login.isNotEmpty() && password.isNotEmpty())
-        }
-    }
-
     fun onLoginChange(newLogin: String) {
         _uiState.value = _uiState.value.copy(
             login = newLogin,
-            emptyLogin = newLogin == ""
+            emptyLogin = newLogin == "",
+            allFieldsFilled = checkFieldsOnEmptiness(
+                login = _uiState.value.login,
+                password = _uiState.value.password
+            )
         )
-        checkFields()
     }
 
     fun onPasswordChange(newPassword: String) {
         _uiState.value = _uiState.value.copy(
             password = newPassword,
             emptyPassword = newPassword == "",
-            notValidPassword = _uiState.value.password.length < 8
+            notValidPassword = _uiState.value.password.length < 8,
+            allFieldsFilled = checkFieldsOnEmptiness(
+                login = _uiState.value.login,
+                password = _uiState.value.password
+            )
         )
-        checkFields()
     }
 
     fun comeIn(navController: NavController) {

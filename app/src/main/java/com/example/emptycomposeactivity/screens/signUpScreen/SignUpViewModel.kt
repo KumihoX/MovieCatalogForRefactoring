@@ -17,6 +17,7 @@ import com.example.emptycomposeactivity.screens.enums.Gender
 import com.example.emptycomposeactivity.screens.enums.toInt
 import com.example.emptycomposeactivity.screens.ext.convertToRequiredExternalDateFormat
 import com.example.emptycomposeactivity.screens.validation.checkEmail
+import com.example.emptycomposeactivity.screens.validation.checkFieldsOnEmptiness
 import kotlinx.coroutines.launch
 
 class SignUpViewModel : ViewModel() {
@@ -45,16 +46,19 @@ class SignUpViewModel : ViewModel() {
     }
 
     private fun checkFields() {
-        val login = _uiState.value.login
-        val email = _uiState.value.email
-        val name = _uiState.value.name
-        val password = _uiState.value.password
-        val confirmPassword = _uiState.value.confirmPassword
-        val dateOfBirth = _uiState.value.dateOfBirth
-        val notValidPassword = _uiState.value.notValidPassword
+        val isAllFieldsNotEmpty = with(_uiState.value) {
+            checkFieldsOnEmptiness(
+                login = login,
+                name = name,
+                email = email,
+                password = password,
+                confirmPassword = confirmPassword,
+                dateOfBirth = dateOfBirth
+            )
+        }
         checkGender()
 
-        if (login.isNotEmpty() && email.isNotEmpty() && name.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && dateOfBirth.isNotEmpty() && !notValidPassword) {
+        if (isAllFieldsNotEmpty && !_uiState.value.notValidPassword) {
             if (_gender != Gender.NOT_SELECTED) {
                 _uiState.value = _uiState.value.copy(
                     allFieldsFilled = _uiState.value.equality == _uiState.value.correct
@@ -68,7 +72,8 @@ class SignUpViewModel : ViewModel() {
 
     fun onLoginChange(newLogin: String) {
         _uiState.value = _uiState.value.copy(
-            login = newLogin, emptyLogin = newLogin == ""
+            login = newLogin,
+            emptyLogin = newLogin == "",
         )
         checkFields()
     }
