@@ -67,7 +67,7 @@ class MovieViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(rating = rating)
     }
 
-    fun changeAnon(changes: Boolean) {
+    fun changeAnon() {
         _uiState.value = _uiState.value.copy(checkedState = !_uiState.value.checkedState)
     }
 

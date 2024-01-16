@@ -72,7 +72,7 @@ fun MovieScreen(navController: NavController) {
         viewModel = viewModel,
         state = uiState,
         { viewModel.onReviewChange(it) },
-        { viewModel.changeAnon(it) })
+        { viewModel.changeAnon() })
 
     val state = rememberCollapsingToolbarScaffoldState()
 

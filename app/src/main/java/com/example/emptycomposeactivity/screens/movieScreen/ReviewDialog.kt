@@ -46,7 +46,7 @@ fun reviewDialog(
     viewModel: MovieViewModel,
     state: MovieScreenState,
     onReviewChange: (String) -> Unit,
-    changeAnon: (Boolean) -> Unit,
+    changeAnon: () -> Unit,
     edit: Boolean? = false
 ) {
     val openDialog = remember { state.openReviewDialog }
@@ -113,7 +113,7 @@ fun reviewDialog(
                         )
                         Checkbox(
                             checked = checkedState,
-                            onCheckedChange = changeAnon,
+                            onCheckedChange = { changeAnon() },
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                                 .padding(0.dp, 0.dp, 0.dp, 16.dp),

@@ -100,7 +100,7 @@ fun ReviewCard(
                         viewModel = viewModel,
                         state = state,
                         { viewModel.onReviewChange(it) },
-                        { viewModel.changeAnon(it) },
+                        { viewModel.changeAnon() },
                         edit = true
                     )
 
