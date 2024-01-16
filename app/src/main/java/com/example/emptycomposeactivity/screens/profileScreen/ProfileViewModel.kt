@@ -14,6 +14,7 @@ import com.example.emptycomposeactivity.screens.enums.toGender
 import com.example.emptycomposeactivity.screens.enums.toInt
 import com.example.emptycomposeactivity.screens.ext.convertToRequiredExternalDateFormat
 import com.example.emptycomposeactivity.screens.ext.convertToRequiredUIDateFormat
+import com.example.emptycomposeactivity.screens.validation.checkEmail
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
@@ -58,13 +59,6 @@ class ProfileViewModel : ViewModel() {
         val dataInBirthday = userData!!.birthDate.convertToRequiredUIDateFormat()
         _uiState.value = _uiState.value.copy(dateOfBirth = dataInBirthday)
         startBirthday = dataInBirthday
-    }
-
-
-    private fun correctEmail() {
-        _uiState.value = _uiState.value.copy(correct = _uiState.value.email.let {
-            android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
-        })
     }
 
     private fun checkGender() {
@@ -112,9 +106,9 @@ class ProfileViewModel : ViewModel() {
     fun onEmailChange(newEmail: String) {
         _uiState.value = _uiState.value.copy(
             email = newEmail,
-            emptyEmail = newEmail == ""
+            emptyEmail = newEmail == "",
+            correct = checkEmail(newEmail)
         )
-        correctEmail()
         checkFields()
     }
 

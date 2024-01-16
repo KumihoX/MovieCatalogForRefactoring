@@ -16,6 +16,7 @@ import com.example.emptycomposeactivity.network.user.UserRepository
 import com.example.emptycomposeactivity.screens.enums.Gender
 import com.example.emptycomposeactivity.screens.enums.toInt
 import com.example.emptycomposeactivity.screens.ext.convertToRequiredExternalDateFormat
+import com.example.emptycomposeactivity.screens.validation.checkEmail
 import kotlinx.coroutines.launch
 
 class SignUpViewModel : ViewModel() {
@@ -35,12 +36,6 @@ class SignUpViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(
             equality = _uiState.value.password == _uiState.value.confirmPassword
         )
-    }
-
-    private fun correctEmail() {
-        _uiState.value = _uiState.value.copy(correct = _uiState.value.email.let {
-            android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
-        })
     }
 
     private fun checkGender() {
@@ -80,9 +75,10 @@ class SignUpViewModel : ViewModel() {
 
     fun onEmailChange(newEmail: String) {
         _uiState.value = _uiState.value.copy(
-            email = newEmail, emptyEmail = newEmail == ""
+            email = newEmail,
+            emptyEmail = newEmail == "",
+            correct = checkEmail(email = newEmail)
         )
-        correctEmail()
         checkFields()
     }
 
