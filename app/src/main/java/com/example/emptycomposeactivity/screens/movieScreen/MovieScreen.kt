@@ -45,7 +45,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.emptycomposeactivity.R
 import com.example.emptycomposeactivity.screens.movieScreen.MovieViewModel.MovieScreenState
@@ -62,7 +61,7 @@ import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
 @Composable
-fun MovieScreen(navController: NavController) {
+fun MovieScreen() {
     val viewModel: MovieViewModel = viewModel()
     val uiState: MovieScreenState by remember { viewModel.uiState }
 

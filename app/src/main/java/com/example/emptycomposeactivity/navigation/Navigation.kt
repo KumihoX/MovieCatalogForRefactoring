@@ -1,23 +1,17 @@
 package com.example.emptycomposeactivity
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.emptycomposeactivity.navigation.BottomNavItem
 import com.example.emptycomposeactivity.navigation.Screens
-import com.example.emptycomposeactivity.network.movies.MoviesRepository
 import com.example.emptycomposeactivity.screens.NavBarScreen
 import com.example.emptycomposeactivity.screens.mainScreen.MainScreen
 import com.example.emptycomposeactivity.screens.movieScreen.MovieScreen
-import com.example.emptycomposeactivity.screens.movieScreen.MovieViewModel
 import com.example.emptycomposeactivity.screens.profileScreen.ProfileScreen
 import com.example.emptycomposeactivity.screens.signInScreen.SignInScreen
 import com.example.emptycomposeactivity.screens.signUpScreen.SignUpScreen
-import kotlinx.coroutines.launch
 
 @Composable
 fun Navigation(navController: NavHostController) {
@@ -32,7 +26,7 @@ fun Navigation(navController: NavHostController) {
         }
 
         composable(route = Screens.MovieScreen.route) {
-            MovieScreen(navController = navController)
+            MovieScreen()
         }
 
         composable(route = Screens.NavBarScreen.route) {
