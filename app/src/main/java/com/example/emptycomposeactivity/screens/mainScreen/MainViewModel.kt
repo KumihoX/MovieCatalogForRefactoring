@@ -21,41 +21,31 @@ class MainViewModel : ViewModel() {
 
     private var currentListOfMovies = Network.movies
     private var currentListOfFavorites = Network.favoriteMovies
-
-    private val _sizeMovieList = mutableStateOf(0)
-    var sizeMovieList: State<Int> = _sizeMovieList
-
-    private val _readyPage = mutableStateOf(false)
-    var readyPage: State<Boolean> = _readyPage
-
     private val _hasErrors = mutableStateOf(false)
 
-    private val _sizeFavoriteList = mutableStateOf(0)
-    var sizeFavoriteList: State<Int> = _sizeFavoriteList
-
-    var listOfFavoriteMovies: List<ShortMovie>? = null
-
-
-    var page = 1
+    private val _uiState = mutableStateOf(MainScreenState())
+    var uiState: State<MainScreenState> = _uiState
 
     init {
         val repositoryMovies = MoviesRepository()
         val repositoryFavoriteMovies = FavoriteMoviesRepository()
 
         viewModelScope.launch {
-            repositoryMovies.getMovies(page).collect {
+            repositoryMovies.getMovies(_uiState.value.page).collect {
                 currentListOfMovies = it
             }
-            page++
 
             repositoryFavoriteMovies.getFavoriteMovies().collect {
                 currentListOfFavorites = it
             }
 
-            _sizeMovieList.value = currentListOfMovies!!.movies.size
-            _sizeFavoriteList.value = currentListOfFavorites!!.movies.size
-            listOfFavoriteMovies = currentListOfFavorites!!.movies
-            _readyPage.value = true
+            _uiState.value = _uiState.value.copy(
+                sizeMovieList = currentListOfMovies!!.movies.size,
+                sizeFavoriteList = currentListOfFavorites!!.movies.size,
+                readyPage = true,
+                listOfFavoriteMovies = currentListOfFavorites!!.movies,
+                page = _uiState.value.page + 1
+            )
         }
     }
 
@@ -78,9 +68,11 @@ class MainViewModel : ViewModel() {
                     currentListOfFavorites = it
                     if (!_hasErrors.value) {
                         if (currentListOfFavorites != null) {
-                            _sizeFavoriteList.value = currentListOfFavorites!!.movies.size
-                            if (_sizeMovieList.value != 0) {
-                                listOfFavoriteMovies = currentListOfFavorites!!.movies
+                            _uiState.value =
+                                _uiState.value.copy(sizeFavoriteList = currentListOfFavorites!!.movies.size)
+                            if (_uiState.value.sizeMovieList != 0) {
+                                _uiState.value =
+                                    _uiState.value.copy(listOfFavoriteMovies = currentListOfFavorites!!.movies)
                             }
                         }
                     }
@@ -124,11 +116,12 @@ class MainViewModel : ViewModel() {
         val repositoryMovies = MoviesRepository()
 
         viewModelScope.launch {
-            if (page != 1) {
-                repositoryMovies.getMovies(page).catch { _hasErrors.value = true }.collect {
-                    movieList.addAll(it.movies)
-                    page += 1
-                }
+            if (_uiState.value.page != 1) {
+                repositoryMovies.getMovies(_uiState.value.page).catch { _hasErrors.value = true }
+                    .collect {
+                        movieList.addAll(it.movies)
+                        _uiState.value = _uiState.value.copy(page = _uiState.value.page + 1)
+                    }
             }
 
         }
@@ -144,4 +137,12 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
+    data class MainScreenState(
+        val sizeMovieList: Int = 0,
+        val readyPage: Boolean = false,
+        val sizeFavoriteList: Int = 0,
+        val listOfFavoriteMovies: List<ShortMovie>? = null,
+        val page: Int = 1
+    )
 }

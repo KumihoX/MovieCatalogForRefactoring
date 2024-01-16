@@ -1,15 +1,27 @@
 package com.example.emptycomposeactivity.screens.mainScreen
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -19,11 +31,11 @@ import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.emptycomposeactivity.R
+import com.example.emptycomposeactivity.screens.mainScreen.MainViewModel.MainScreenState
 import com.example.emptycomposeactivity.ui.theme.Black
 import com.example.emptycomposeactivity.ui.theme.DarkRed
 import com.example.emptycomposeactivity.ui.theme.IBM
@@ -33,17 +45,18 @@ import com.example.emptycomposeactivity.ui.theme.White
 fun MainScreen(movieDescription: () -> Unit) {
 
     val viewModel = MainViewModel()
-    val ready = remember { viewModel.readyPage }
+    val state by remember { viewModel.uiState }
+    val ready = remember { state.readyPage }
 
-    if (ready.value) {
+    if (ready) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Black)
         ) {
-            item { PromotedFilm(viewModel = viewModel) { movieDescription() } }
+            item { PromotedFilm(viewModel = viewModel, state = state) { movieDescription() } }
             item { Spacer(modifier = Modifier.height(32.dp)) }
-            item { FavoritesList(viewModel = viewModel) }
+            item { FavoritesList(viewModel = viewModel, state = state) }
             item { Gallery() }
 
             itemsIndexed(
@@ -70,7 +83,7 @@ fun MainScreen(movieDescription: () -> Unit) {
                     ) { movieDescription() }
                 }
 
-                if (index == lastIndex && viewModel.page < 6) {
+                if (index == lastIndex && state.page < 6) {
                     viewModel.getMovies()
                 }
             }
@@ -80,12 +93,12 @@ fun MainScreen(movieDescription: () -> Unit) {
 }
 
 @Composable
-fun PromotedFilm(viewModel: MainViewModel, movieDescription: () -> Unit) {
+fun PromotedFilm(viewModel: MainViewModel, state: MainScreenState, movieDescription: () -> Unit) {
 
     var image =
         "https://kartinkin.net/uploads/posts/2021-07/thumbs/1626193375_35-kartinkin-com-p-chernii-ekran-fon-krasivo-36.jpg"
 
-    if (viewModel.sizeMovieList.value != 0) {
+    if (state.sizeMovieList != 0) {
         if (viewModel.movieList[0].poster != "") {
             image = viewModel.movieList[0].poster
         }
@@ -144,8 +157,8 @@ fun PromotedFilm(viewModel: MainViewModel, movieDescription: () -> Unit) {
 }
 
 @Composable
-fun FavoritesList(viewModel: MainViewModel) {
-    if (viewModel.sizeFavoriteList.value != 0) {
+fun FavoritesList(viewModel: MainViewModel, state: MainScreenState) {
+    if (state.sizeFavoriteList != 0) {
 
         Text(
             text = stringResource(R.string.favorite),
@@ -185,7 +198,7 @@ fun FavoritesList(viewModel: MainViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             state = listState,
         ) {
-            items(viewModel.sizeFavoriteList.value) { index ->
+            items(state.sizeFavoriteList) { index ->
 
                 var width = 100.dp
                 var height = 144.dp
@@ -197,8 +210,8 @@ fun FavoritesList(viewModel: MainViewModel) {
 
                 FavoritesCard(
                     viewModel = viewModel,
-                    image = viewModel.listOfFavoriteMovies!![index].poster,
-                    id = viewModel.listOfFavoriteMovies!![index].id,
+                    image = state.listOfFavoriteMovies!![index].poster,
+                    id = state.listOfFavoriteMovies[index].id,
                     width,
                     height
                 )
