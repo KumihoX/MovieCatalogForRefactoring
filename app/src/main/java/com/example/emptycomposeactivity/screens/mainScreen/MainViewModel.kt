@@ -59,26 +59,20 @@ class MainViewModel : ViewModel() {
     )
 
     fun update(id: String) {
-
         val repository = FavoriteMoviesRepository()
         viewModelScope.launch {
             repository.deleteFavoriteMovies(id)
             repository.getFavoriteMovies().catch { _hasErrors.value = true }
                 .collect {
                     currentListOfFavorites = it
-                    if (!_hasErrors.value) {
-                        if (currentListOfFavorites != null) {
-                            _uiState.value =
-                                _uiState.value.copy(sizeFavoriteList = currentListOfFavorites!!.movies.size)
-                            if (_uiState.value.sizeMovieList != 0) {
-                                _uiState.value =
-                                    _uiState.value.copy(listOfFavoriteMovies = currentListOfFavorites!!.movies)
-                            }
-                        }
+                    if (_hasErrors.value || currentListOfFavorites == null) return@collect
+                    _uiState.value =
+                        _uiState.value.copy(sizeFavoriteList = currentListOfFavorites!!.movies.size)
+                    if (_uiState.value.sizeMovieList != 0) {
+                        _uiState.value =
+                            _uiState.value.copy(listOfFavoriteMovies = currentListOfFavorites!!.movies)
                     }
                 }
-
-
         }
     }
 
